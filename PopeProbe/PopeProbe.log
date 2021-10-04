@@ -1,0 +1,13 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(513,5): warning MSB8028: 中間ディレクトリ (G:\Pipe\PopeProbe\) に別のプロジェクト (PipeProbe (2021_09_19 10_01_20 UTC).vcxproj, PopeProbe (2021_09_19 10_01_20 UTC).vcxproj) と共有されているファイルが含まれています。これにより、クリーンしてリビルド動作が適切に行われない可能性があります。
+  pch.cpp
+  ExeEngine.cpp
+  MainDlg.cpp
+G:\Pipe\PopeProbe\MainDlg.cpp(187,9): warning C4101: 'hChild_Up_Rd': ローカル変数は 1 度も使われていません。
+G:\Pipe\PopeProbe\MainDlg.cpp(187,53): warning C4101: 'hChild_Down_Wr': ローカル変数は 1 度も使われていません。
+  PopeProbe.cpp
+  Probe.cpp
+  Profile.cpp
+  ProfileLogView.cpp
+  Regex.cpp
+  コードを生成中...
+  PopeProbe.vcxproj -> G:\Pipe\PopeProbe\Debug\PipeProbe.exe
