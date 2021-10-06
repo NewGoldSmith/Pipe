@@ -74,6 +74,8 @@ BOOL CProbeSettingMainDlg::OnInitDialog()
 	// TODO: 初期化をここに追加します。
 	LoadProfile();
 
+//	SetWindowLong(hWnd, GWL_EXSTYLE, 0);
+	::SetWindowLong(this->GetSafeHwnd(),GWL_EXSTYLE, WS_EX_COMPOSITED);
 //子ダイアログの作成及び、タブコントロールへの挿入
 	m_PropGenelal.Create(IDD_PROPPAGE_GENELAL, &m_ctlMainTab);
 	m_PropLogSetting.Create(IDD_PROPPAGE_LOG_FILE, &m_ctlMainTab);

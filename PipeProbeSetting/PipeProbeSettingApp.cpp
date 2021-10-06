@@ -56,7 +56,7 @@ BOOL CPipeProbeSettingApp::InitInstance()
 	// この文字列を変更してください。
 //	SetRegistryKey(_T("アプリケーション ウィザードで生成されたローカル アプリケーション"));
 	TCHAR cmdline[MAX_PATH];
-	strcpy_s(cmdline, MAX_PATH, m_lpCmdLine);
+	_tcscpy_s(cmdline, MAX_PATH, m_lpCmdLine);
 	TCHAR	szModulePathName[MAX_PATH];
 	::GetModuleFileName(AfxGetInstanceHandle(), szModulePathName, MAX_PATH);	// DLLでも使えるようにAfxGetInstanceHandle()を使っている。
 	TCHAR	szIniPathName[_MAX_PATH];
