@@ -49,12 +49,10 @@ BEGIN_MESSAGE_MAP(CPipeProbeMainDlg, CDialogEx)
 	ON_MESSAGE(WM_USER_READ_DOWN, &CPipeProbeMainDlg::OnUserReadDown)
 	ON_MESSAGE(WM_USER_READ_UP, &CPipeProbeMainDlg::OnUserReadUp)
 	ON_MESSAGE(WM_USER_EXE_MESSAGE, &CPipeProbeMainDlg::OnUserExeMessage)
-//	ON_WM_SHOWWINDOW()
 	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
 	ON_BN_CLICKED(ID_PIPE_DISCONNECT, &CPipeProbeMainDlg::OnBnClickedDisconnectPipe)
 	ON_MESSAGE(WM_TASKTRAY, &CPipeProbeMainDlg::OnTasktray)
-//	ON_WM_SHOWWINDOW()
 	ON_WM_WINDOWPOSCHANGING()
 	ON_BN_CLICKED(IDC_BUTTON_FORCED_TERMINATION, &CPipeProbeMainDlg::OnBnClickedButtonForcedTermination)
 	ON_BN_CLICKED(IDC_BUTTON_GO_TASKTRAY, &CPipeProbeMainDlg::OnBnClickedButtonGoTasktray)
@@ -102,7 +100,7 @@ BOOL CPipeProbeMainDlg::OnInitDialog()
 	Execute();
 
 	TrayExecute(NIM_ADD);
-//ウインドウを表示状態をセットする。
+	//ウインドウを表示状態をセットする。
 	switch (m_ProfileGenelal.m_iMainWindowShowStatus)
 	{
 	case 0:
@@ -174,7 +172,7 @@ void CPipeProbeMainDlg::LoadProfile()
 	CWinApp* pApp = AfxGetApp();
 	CString strSec(_T("SYSTEM"));
 	m_bINI_Existing = pApp->GetProfileInt(strSec, _T("INI_EXISTING"), FALSE);
-	m_bFirst_Appear = pApp->GetProfileIntA(strSec, _T("FIRST_APPEAR"), TRUE);
+	m_bFirst_Appear = pApp->GetProfileInt(strSec, _T("FIRST_APPEAR"), TRUE);
 	m_rectMainWnd.left = pApp->GetProfileInt(strSec, _T("WINDOW_POS_MAIN_LEFT"), NULL);
 	m_rectMainWnd.top = pApp->GetProfileInt(strSec, _T("WINDOW_POS_MAIN_TOP"), NULL);
 	m_rectMainWnd.right = pApp->GetProfileInt(strSec, _T("WINDOW_POS_MAIN_RIGHT"), NULL);
@@ -216,7 +214,7 @@ void CPipeProbeMainDlg::OnDestroy()
 //子プロセス起動処理
 void CPipeProbeMainDlg::Execute()
 {
-//パイプ作成
+	//パイプ作成
 	CWinApp* pApp = AfxGetApp();
 	SECURITY_ATTRIBUTES saAttr = {};
 
@@ -235,7 +233,7 @@ void CPipeProbeMainDlg::Execute()
 	if (!SetHandleInformation(m_hChild_Down_Wr, HANDLE_FLAG_INHERIT, 0))
 		return;
 
-//コマンドライン解析　/Debugが指定されていたらコンソール立ち上げ
+	//コマンドライン解析　/Debugが指定されていたらコンソール立ち上げ
 	PipeProbeCommandOption CCmdOp;
 	pApp->ParseCommandLine(CCmdOp);
 	BOOL brval;
@@ -246,16 +244,16 @@ void CPipeProbeMainDlg::Execute()
 		brval = ::DeleteMenu(::GetSystemMenu(m_hConsole, FALSE), SC_CLOSE, MF_BYCOMMAND);
 	}
 
-//子プロセス起動	
+	//子プロセス起動	
 	HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	CString strCommandLine =m_ProfileChild.CreateCommandLine(m_ProfileGenelal.m_strChildPathName);
-	m_ExeEngine.Execute(strCommandLine, hChild_Down_Rd, hChild_Up_Wr, hChild_Up_Wr, STARTF_USESTDHANDLES| STARTF_USESHOWWINDOW, this, WM_USER_EXE_MESSAGE);
+	CString strCommandLine = m_ProfileChild.CreateCommandLine(m_ProfileGenelal.m_strChildPathName);
+	m_ExeEngine.Execute(strCommandLine, hChild_Down_Rd, hChild_Up_Wr, hChild_Up_Wr, STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW, this, WM_USER_EXE_MESSAGE);
 
-//パイプ接続
-	m_ProbeDown.Connect(hIn, m_hChild_Down_Wr, m_BufDown, BUF_SIZE, ID_PROBE_DOWN, WM_USER_READ_DOWN,  this);
-	m_ProbeUp.Connect(m_hChild_Up_Rd, hOut, m_BufUp, BUF_SIZE,  ID_PROBE_UP, WM_USER_READ_UP,  this);
+	//パイプ接続
+	m_ProbeDown.Connect(hIn, m_hChild_Down_Wr, m_BufDown, BUF_SIZE, ID_PROBE_DOWN, WM_USER_READ_DOWN, this);
+	m_ProbeUp.Connect(m_hChild_Up_Rd, hOut, m_BufUp, BUF_SIZE, ID_PROBE_UP, WM_USER_READ_UP, this);
 	CloseHandle(hChild_Down_Rd);
 	CloseHandle(hChild_Up_Wr);
 
@@ -264,8 +262,8 @@ void CPipeProbeMainDlg::Execute()
 	if (m_ProfileLogFile.m_bMakeLogFile == TRUE)
 	{
 		strPathName = m_ProfileLogFile.m_strLogDir;
-		strPathName +=_T("\\") + m_ProfileLogFile.MakeFilename(m_ProfileLogFile.m_strNameFormat);
-		m_hFile =CreateFile(strPathName.GetBuffer(), GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_ARCHIVE, NULL);
+		strPathName += _T("\\") + m_ProfileLogFile.MakeFilename(m_ProfileLogFile.m_strNameFormat);
+		m_hFile = CreateFile(strPathName.GetBuffer(), GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_ARCHIVE, NULL);
 		if (m_hFile == INVALID_HANDLE_VALUE)
 		{
 			_T("\r\nログファイル作成エラー\r\n");
@@ -273,12 +271,12 @@ void CPipeProbeMainDlg::Execute()
 		}
 		strPathName.ReleaseBuffer();
 
-//子プロセスの起動コマンドラインをログに書き込むかどうか。
+		//子プロセスの起動コマンドラインをログに書き込むかどうか。
 		if (m_ProfileLogFile.m_bWriteCommand == TRUE)
 		{
-			CString strCommand = CString(_T("Child process execute command:\""))+ strCommandLine.GetBuffer() + _T("\"\r\n");
+			CString strCommand = CString(_T("Child process execute command:\"")) + strCommandLine.GetBuffer() + _T("\"\r\n");
 			strCommandLine.ReleaseBuffer();
-			DWORD numWrite, numWriten=0;
+			DWORD numWrite, numWriten = 0;
 			numWrite = strCommand.GetLength();
 			if (!WriteFile(m_hFile, strCommand.GetBuffer(), numWrite, &numWriten, NULL))
 			{
@@ -294,12 +292,13 @@ void CPipeProbeMainDlg::Execute()
 //ProbeよりWindowメッセージとして、読み込みの通知がされる。
 afx_msg LRESULT CPipeProbeMainDlg::OnUserReadDown(WPARAM wParam, LPARAM lParam)
 {
-//0以外エラー発生
+	USES_CONVERSION;
+	//0以外エラー発生
 	if (wParam != 0)
 	{
 		TRACE(_T("\r\nOnUserReadDown---Error\r\n"));
 	}
-//-1は切断
+	//-1は切断
 	if (-1 == lParam)
 	{
 		TRACE(_T("\r\nOnUserReadDown切断されました。\r\n"));
@@ -307,9 +306,10 @@ afx_msg LRESULT CPipeProbeMainDlg::OnUserReadDown(WPARAM wParam, LPARAM lParam)
 
 	//GetStringが呼ばれた後、ProbeはWrite処理を開始する。
 	CString strView = m_ProbeDown.GetString();
-	CString strFile = strView;
+	//ファイル書き込みは８ビット文字列に変換
+	CStringA strFile = CStringA(strView);
 
-//表示の為の処理
+	//表示の為の処理
 	UpdateData(TRUE);
 	CString strSearch = m_Regex.TranslateEscape(m_ProfileLogView.m_strSearchDown);
 	CString strReplace = m_Regex.TranslateEscape(m_ProfileLogView.m_strReplaceDown);
@@ -336,7 +336,7 @@ afx_msg LRESULT CPipeProbeMainDlg::OnUserReadDown(WPARAM wParam, LPARAM lParam)
 	//ログファイルの為の書き込み処理
 	if (m_ProfileLogFile.m_bMakeLogFile == TRUE)
 	{
-		strFile = m_Regex.ExecuteRegex(strFile, m_ProfileLogFile.m_strSearchDown, m_ProfileLogFile.m_strReplaceDown);
+		strFile = m_Regex.ExecuteRegex(CString(strFile), m_ProfileLogFile.m_strSearchDown, m_ProfileLogFile.m_strReplaceDown);
 		DWORD numWrite=0,numWriten=0;
 		numWrite = strFile.GetLength();
 		if (!WriteFile(m_hFile, strFile.GetBuffer(), numWrite, &numWriten, NULL))
@@ -350,6 +350,7 @@ afx_msg LRESULT CPipeProbeMainDlg::OnUserReadDown(WPARAM wParam, LPARAM lParam)
 //ProbeよりWindowメッセージとして、読み込みの通知がされる。
 afx_msg LRESULT CPipeProbeMainDlg::OnUserReadUp(WPARAM wParam, LPARAM lParam)
 {
+	USES_CONVERSION;
 	//0以外エラー
 	if (wParam != 0)
 	{
@@ -363,7 +364,8 @@ afx_msg LRESULT CPipeProbeMainDlg::OnUserReadUp(WPARAM wParam, LPARAM lParam)
 	}
 	//GetStringが呼ばれた後、ProbeはWrite処理を開始する。
 	CString strView = m_ProbeUp.GetString();
-	CString strFile = strView;
+	//ファイル書き込みは８ビット文字列に変換
+	CStringA strFile = CStringA(strView);
 
 	//表示の為の処理
 	UpdateData(TRUE);
@@ -390,13 +392,14 @@ afx_msg LRESULT CPipeProbeMainDlg::OnUserReadUp(WPARAM wParam, LPARAM lParam)
 	TotalLength=m_strEditMain.GetLength();
 	UpdateData(FALSE);
 	m_ctlEditMain.SetSel(TotalLength, TotalLength);
+
 	//ログファイルの為の書き込み処理
 	if (m_ProfileLogFile.m_bMakeLogFile == TRUE)
 	{
-		strFile = m_Regex.ExecuteRegex(strFile, m_ProfileLogFile.m_strSearchUp, m_ProfileLogFile.m_strReplaceUp);
+		strFile = m_Regex.ExecuteRegex(CString(strFile), m_ProfileLogFile.m_strSearchUp, m_ProfileLogFile.m_strReplaceUp);
 		DWORD numWrite = 0, numWriten = 0;
 		numWrite = strFile.GetLength();
-		if (!WriteFile(m_hFile, strFile.GetBuffer(), numWrite, &numWriten, NULL))
+		if (!WriteFile(m_hFile, strFile, numWrite, &numWriten, NULL))
 		{
 			_T("\r\n書き込みエラー\r\n");
 		}

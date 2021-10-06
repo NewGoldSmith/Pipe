@@ -88,8 +88,6 @@ public:
 	afx_msg void OnBnClickedButtonForcedTermination();
 	afx_msg void OnBnClickedButtonGoTasktray();
 	afx_msg void OnClose();
-//	afx_msg void OnNcLButtonDown(UINT nHitTest, CPoint point);
-//	afx_msg void OnStnClickedStaticInfomation();
 protected:
 	BOOL m_bFirst_Appear;
 	CRect m_rectMainWnd;
