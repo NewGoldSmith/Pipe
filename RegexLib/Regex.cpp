@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Regex.h"
 #include <afxwin.h>
-#include <tchar.h>
+
 
 CString Regex::TranslateEscape(CString strSource)
 {

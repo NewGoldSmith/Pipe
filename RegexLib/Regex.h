@@ -1,4 +1,6 @@
 #pragma once
+#include <afxwin.h>
+#include <atlstr.h>
 #include <string>
 #include <regex>
 
