@@ -1,4 +1,5 @@
-﻿//{{NO_DEPENDENCIES}}
+﻿#define WS_EX_COMPOSITED 0x02000000L
+//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ で生成されたインクルード ファイル。
 // PipeProbeSetting.rc で使用
 //

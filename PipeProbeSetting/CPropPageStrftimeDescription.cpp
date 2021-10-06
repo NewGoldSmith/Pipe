@@ -61,7 +61,7 @@ BOOL CPropPageStrftimeDescription::OnInitDialog()
 {
 	CProfileableDlg::OnInitDialog();
 	CString str;
-	int bRes= str.LoadStringA(IDS_STRING_STRFTIME_DESCRIPTION);
+	int bRes= str.LoadString(IDS_STRING_STRFTIME_DESCRIPTION);
 	Regex reg;
 	m_strDescription = reg.TranslateEscape(str);
 	UpdateData(FALSE);
