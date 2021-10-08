@@ -12,6 +12,37 @@
 #define new DEBUG_NEW
 #endif
 
+// CAboutDlg ダイアログ
+class CAboutDlg :
+	public CDialogEx
+{
+public:
+	CAboutDlg();
+
+	// ダイアログ データ
+#ifdef AFX_DESIGN_TIME
+	enum { IDD = IDD_ABOUTBOX };
+#endif
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
+
+// 実装
+protected:
+	DECLARE_MESSAGE_MAP()
+};
+
+CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
+{
+}
+
+void CAboutDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialogEx::DoDataExchange(pDX);
+}
+
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+END_MESSAGE_MAP()
 
 // CPipeProbeMainDlg ダイアログ
 
@@ -57,6 +88,8 @@ BEGIN_MESSAGE_MAP(CPipeProbeMainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_FORCED_TERMINATION, &CPipeProbeMainDlg::OnBnClickedButtonForcedTermination)
 	ON_BN_CLICKED(IDC_BUTTON_GO_TASKTRAY, &CPipeProbeMainDlg::OnBnClickedButtonGoTasktray)
 	ON_WM_CLOSE()
+	ON_WM_SYSCOMMAND()
+	ON_COMMAND(IDM_ABOUTBOX, &CPipeProbeMainDlg::OnAboutbox)
 END_MESSAGE_MAP()
 
 
@@ -66,6 +99,25 @@ BOOL CPipeProbeMainDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	// "バージョン情報..." メニューをシステム メニューに追加します。
+
+	// IDM_ABOUTBOX は、システム コマンドの範囲内になければなりません。
+	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
+	ASSERT(IDM_ABOUTBOX < 0xF000);
+
+	CMenu* pSysMenu = GetSystemMenu(FALSE);
+	if (pSysMenu != nullptr)
+	{
+		BOOL bNameValid;
+		CString strAboutMenu;
+		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+		ASSERT(bNameValid);
+		if (!strAboutMenu.IsEmpty())
+		{
+			pSysMenu->AppendMenu(MF_SEPARATOR);
+			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+		}
+	}
 	// このダイアログのアイコンを設定します。アプリケーションのメイン ウィンドウがダイアログでない場合、
 	//  Framework は、この設定を自動的に行います。
 	SetIcon(m_hIcon, TRUE);			// 大きいアイコンの設定
@@ -531,23 +583,39 @@ afx_msg LRESULT CPipeProbeMainDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 			}
 		}
 		break;
-		return 0;
+	case WM_RBUTTONDOWN:
+		if (wParam == IDR_MAINFRAME) {
+
+			CMenu menu;
+			CMenu Submenu;
+			menu.LoadMenu(IDR_MENU_TASK_MENU);
+			Submenu.Attach(menu.GetSubMenu(0)->GetSafeHmenu());
+			CMenu* pPopup = &Submenu;
+			SetForegroundWindow();
+			POINT pt;
+			GetCursorPos(&pt);
+			pPopup->TrackPopupMenu(TPM_RIGHTBUTTON, pt.x, pt.y, this);
+			pPopup->Detach();
+			menu.DestroyMenu();
+		}
+		break;
+	default:
+		break;
 	}
 	return 0;
 }
 
-
-	void CPipeProbeMainDlg::MainWndShow()
+void CPipeProbeMainDlg::MainWndShow()
+{
+	m_b_is_hide = false;
+	ShowWindow(SW_NORMAL);
+	if (m_hConsole != 0)
 	{
-		m_b_is_hide = false;
-		ShowWindow(SW_NORMAL);
-		if (m_hConsole != 0)
-		{
-			::ShowWindow(m_hConsole, SW_NORMAL);
-		}
-		SetForegroundWindow();
-		SetFocus();
+		::ShowWindow(m_hConsole, SW_NORMAL);
 	}
+	SetForegroundWindow();
+	SetFocus();
+}
 
 
 	void CPipeProbeMainDlg::MainWndIcon()
@@ -607,3 +675,24 @@ afx_msg LRESULT CPipeProbeMainDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 		CDialogEx::OnClose();
 	}
 
+
+
+	void CPipeProbeMainDlg::OnSysCommand(UINT nID, LPARAM lParam)
+	{
+		if ((nID & 0xFFF0) == IDM_ABOUTBOX)
+		{
+			CAboutDlg dlgAbout;
+			dlgAbout.DoModal();
+		}
+		else
+		{
+			CDialogEx::OnSysCommand(nID, lParam);
+		}
+	}
+
+
+	void CPipeProbeMainDlg::OnAboutbox()
+	{
+		CAboutDlg dlgAbout;
+		dlgAbout.DoModal();
+	}

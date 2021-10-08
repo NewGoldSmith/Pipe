@@ -11,6 +11,7 @@
 #include "ProfileGenelal.h"
 #include "ProfileChild.h"
 #include "PipeProbeCommandOption.h"
+#include "resource.h"
 
 #define BUF_SIZE 16384
 #define WM_USER_EXE_MESSAGE WM_USER + 1
@@ -91,4 +92,7 @@ public:
 protected:
 	BOOL m_bFirst_Appear;
 	CRect m_rectMainWnd;
+public:
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	afx_msg void OnAboutbox();
 };
