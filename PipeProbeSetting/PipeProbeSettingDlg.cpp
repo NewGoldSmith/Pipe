@@ -57,6 +57,7 @@ BEGIN_MESSAGE_MAP(CProbeSettingMainDlg, CDialogEx)
 	ON_WM_PARENTNOTIFY()
 	ON_BN_CLICKED(IDC_BUTTON_TEST_EXECUTE, &CProbeSettingMainDlg::OnBnClickedButtonTestExecute)
 	ON_BN_CLICKED(IDC_BUTTON_INSTALL_EXE, &CProbeSettingMainDlg::OnBnClickedButtonInstallExe)
+	ON_WM_SYSCOMMAND()
 END_MESSAGE_MAP()
 
 
@@ -65,6 +66,26 @@ END_MESSAGE_MAP()
 BOOL CProbeSettingMainDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	// "バージョン情報..." メニューをシステム メニューに追加します。
+
+	// IDM_ABOUTBOX は、システム コマンドの範囲内になければなりません。
+	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
+	ASSERT(IDM_ABOUTBOX < 0xF000);
+
+	CMenu* pSysMenu = GetSystemMenu(FALSE);
+	if (pSysMenu != nullptr)
+	{
+		BOOL bNameValid;
+		CString strAboutMenu;
+		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+		ASSERT(bNameValid);
+		if (!strAboutMenu.IsEmpty())
+		{
+			pSysMenu->AppendMenu(MF_SEPARATOR);
+			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+		}
+	}
 
 	// このダイアログのアイコンを設定します。アプリケーションのメイン ウィンドウがダイアログでない場合、
 	//  Framework は、この設定を自動的に行います。
@@ -489,4 +510,18 @@ void CProbeSettingMainDlg::OnBnClickedButtonInstallExe()
 	}
 	delete pDlg;
 	UpdateData(FALSE);
+}
+
+
+void CProbeSettingMainDlg::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
+	{
+		CAboutDlg dlgAbout;
+		dlgAbout.DoModal();
+	}
+	else
+	{
+		CDialogEx::OnSysCommand(nID, lParam);
+	}
 }

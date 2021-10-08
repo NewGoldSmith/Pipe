@@ -204,6 +204,7 @@
   <ItemGroup>
     <ClInclude Include="..\PopeProbe\ExeEngine.h" />
     <ClInclude Include="..\RegexLib\Regex.h" />
+    <ClInclude Include="CAboutDlg.h" />
     <ClInclude Include="CProfileableDlg.h" />
     <ClInclude Include="CDialogTab.h" />
     <ClInclude Include="CPropPageChild.h" />
@@ -222,6 +223,7 @@
   <ItemGroup>
     <ClCompile Include="..\PopeProbe\ExeEngine.cpp" />
     <ClCompile Include="..\RegexLib\Regex.cpp" />
+    <ClCompile Include="CAboutDlg.cpp" />
     <ClCompile Include="CProfileableDlg.cpp" />
     <ClCompile Include="CDialogTab.cpp" />
     <ClCompile Include="CPropPageChild.cpp" />
