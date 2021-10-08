@@ -84,7 +84,7 @@ BOOL Regex::Verify(CString strSource, CString strRegex, CString strReplace)
 		std::basic_string<TCHAR> result;
 		result = std::regex_replace(std_strSource, rx, std_strFmt);
 	}
-	catch (std::regex_error& e)
+	catch (std::regex_error& )
 	{
 		bResult = FALSE;
 	}
