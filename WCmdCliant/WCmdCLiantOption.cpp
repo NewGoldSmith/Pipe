@@ -8,7 +8,7 @@ WCmdCLiantOption::WCmdCLiantOption():CCommandLineInfo()
 }
 void WCmdCLiantOption::ParseParam( const TCHAR* pszParam,  BOOL bFlag,  BOOL bLast)
 {
-	if (pszParam == CString("Debug"))
+	if (!CString("Debug").CompareNoCase(pszParam))
 	{
 		m_bDebug = TRUE;
 	}

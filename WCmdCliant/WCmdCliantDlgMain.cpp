@@ -13,6 +13,39 @@
 #define new DEBUG_NEW
 #endif
 
+//CAboutDlg ダイアログ
+class CAboutDlg :
+	public CDialogEx
+{
+public:
+	CAboutDlg();
+
+	// ダイアログ データ
+#ifdef AFX_DESIGN_TIME
+	enum { IDD = IDD_ABOUTBOX };
+#endif
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
+
+// 実装
+protected:
+	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnEnChangeEdit1();
+};
+
+CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
+{
+}
+
+void CAboutDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialogEx::DoDataExchange(pDX);
+}
+
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+END_MESSAGE_MAP()
 
 // CWCmdCliantMainDlg ダイアログ
 
@@ -329,22 +362,7 @@ afx_msg LRESULT CWCmdCliantMainDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 {
 	switch (lParam)
 	{
-		//if (wParam == IDR_MAINFRAME) {    // アイコンID
-		//	if (m_b_is_hide)
-		//	{
-		//		MainWndShow();
-		//	}
-		//	else if (IsIconic())
-		//	{
-		//		MainWndShow();
-		//	}
-		//	else
-		//	{
-		//		MainWndHide();
-		//	}
-
-		//}
-		//break;
+	case WM_COMMAND:
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
 		if (wParam == IDR_MAINFRAME) {
@@ -369,6 +387,11 @@ afx_msg LRESULT CWCmdCliantMainDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 
 BOOL CWCmdCliantMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 {
+	if (wParam == IDM_ABOUTBOX)
+	{
+		CAboutDlg dlgAbout;
+		dlgAbout.DoModal();
+	}
 	if (wParam == ID_TASK_MENU_CLOSE)
 	{
 		PostMessage(WM_CLOSE);
