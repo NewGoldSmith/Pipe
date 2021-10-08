@@ -61,7 +61,6 @@ BOOL CProfileableDlg::Changed()
 BOOL CProfileableDlg::PreTranslateMessage(MSG* pMsg)
 {
 //主な処理はダイアログでリターンキーを押すとダイアログが終了するので、これを別の処理に置き換える。
-	BOOL b;
 	SHORT key;
 	CWnd* pWnd;
 	switch (pMsg->message)

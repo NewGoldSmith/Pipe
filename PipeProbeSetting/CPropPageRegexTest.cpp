@@ -82,9 +82,7 @@ void CPropPageRegexTest::OnBnClickedButtonExecuteRegex()
 
 BOOL CPropPageRegexTest::PreTranslateMessage(MSG* pMsg)
 {
-	BOOL b;
 	CWnd* pWnd;
-	SHORT key;
 	switch (pMsg->message)
 	{
 	case WM_KEYDOWN:

@@ -39,8 +39,6 @@ void CPropPageStrftimeDescription::LoadProfileApp(CWinApp* pApp)
 {
 	CString strSec = _T("STRFTIME_DESCRIPTION");
 	CString str = pApp->GetProfileString(strSec, _T("TEXT"), _T(""));
-	Regex reg;
-//	m_strDescription =reg.TranslateEscape(str);
 	UpdateData(FALSE);
 	m_bChange = FALSE;
 }

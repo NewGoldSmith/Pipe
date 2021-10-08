@@ -10,6 +10,8 @@
 #include "CPropPageLogView.h"
 #include "CPropPageRegexTest.h"
 #include "CPropPageStrftimeDescription.h"
+#include "resource.h"
+#include "CAboutDlg.h"
 
 // CProbeSettingMainDlg ダイアログ
 class CProbeSettingMainDlg : public CDialogEx
@@ -73,4 +75,5 @@ protected:
 	CString m_strExePathName;
 public:
 	afx_msg void OnBnClickedButtonInstallExe();
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 };
