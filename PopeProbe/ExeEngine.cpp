@@ -34,7 +34,7 @@ int ExeEngine::Execute(CString strCommand, HANDLE hPipeIn, HANDLE hPipeOut, HAND
 	strCommand.ReleaseBuffer();
 	if (bSuccess == FALSE)
 	{
-		AfxMessageBox(_T("子プロセス起動に失敗しました。"), MB_ICONSTOP | MB_OK);
+		AfxMessageBox(_T("子プロセス起動に失敗しました。\r\nPipeProbeSettingで設定が正しいか確認してください。"), MB_ICONSTOP | MB_OK);
 		ExitProcess(0);
 	}
 	// ChildProcessの起動状態監視用スレッド。
