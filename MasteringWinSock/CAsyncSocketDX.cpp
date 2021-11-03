@@ -420,3 +420,15 @@ void CAsyncSocketDX::ClearErrCode()
     m_Err = 0;
     m_eUserErr = CAsyncSocketDX::UserErrCode::NoUserErr;
 }
+
+
+BOOL CAsyncSocketDX::SetSockOpt(int nOptionName, const void* lpOptionValue, int nOptionLen, int nLevel)
+{
+    BOOL rVal = FALSE;
+    rVal = CAsyncSocket::SetSockOpt(nOptionName, lpOptionValue, nOptionLen, nLevel);
+    if (!rVal)
+    {
+        m_Err = GetLastError();
+    }
+    return rVal;
+}

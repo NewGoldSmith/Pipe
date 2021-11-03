@@ -66,6 +66,8 @@ public:
 	int Send(const void* lpBuf, int nBufLen, int nFlags = 0);
 protected:
 	void ClearErrCode();
+public:
+	BOOL SetSockOpt(int nOptionName, const void* lpOptionValue, int nOptionLen, int nLevel);
 };
 
 
