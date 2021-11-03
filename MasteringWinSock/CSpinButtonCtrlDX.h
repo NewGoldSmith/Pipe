@@ -14,10 +14,6 @@ public:
 
 protected:
 	DECLARE_MESSAGE_MAP()
-public:
-//	CWnd* SetBuddy(CIPAddressCtrlDX* pCIPAddressCtrlDX);
-//	CWnd* SetBuddy(CWnd* pWnd);
-protected:
 	CIPAddressCtrlDX* m_pCIPAddressCtrlDX;
 	CWnd* SelectReturnWndPointer();
 //	CEdit* m_pCEdit;

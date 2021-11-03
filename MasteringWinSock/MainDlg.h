@@ -8,6 +8,7 @@
 #include "CListCtrlForSocket.h"
 #include "StringHelper.h"
 #include "CComboBoxDX.h"
+#include "CEditNum.h"
 
 #define WM_USER_SOCK_LISTEN_MESSAGE WM_USER +40
 #define WM_USER_SOCK_SERVER_MESSAGE WM_USER +41
@@ -65,18 +66,12 @@ protected:
 	CSpinButtonCtrlDX m_SpinConnectToPort;
 	CListCtrlForSocket m_ListListenCreate;
 	CListCtrlForSocket m_ListCliCreate;
-//	CListCtrlForSocket m_ListListenWaitAccept;
-//	CListCtrlForSocket m_ListCliWaitAccept;
 	CListCtrlForSocket m_ListSevConnected;
 	CListCtrlForSocket m_ListCliConnected;
-//	CEdit m_EditSevBinaryForSending;
-//	CEdit m_EditSevTextForSending;
-//	CEdit m_EditCliBinaryForSending;
-//	CEdit m_EditCliTextForSending;
 	CEdit m_EditSevReceivedBinary;
 	CEdit m_EditSevReceivedText;
 	CEdit m_EditCliReceivedBinary;
-	CEdit m_EditCliRedeivedText;
+	CEdit m_EditCliReceivedText;
 public:
 	afx_msg void OnBnClickedButtonListenCreate();
 protected:
@@ -96,15 +91,11 @@ public:
 	afx_msg void OnBnClickedButtonCliClose();
 	afx_msg void OnBnClickedButtonCliDelete();
 	afx_msg void OnBnClickedButtonCliConnect();
-//	afx_msg void OnBnClickedButtonCliWaitingClose();
-//	afx_msg void OnBnClickedButtonCliWaitingDelete();
 protected:
 	afx_msg LRESULT OnUserPipeListenMessage(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUserPipeServerMessage(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUserPipeClientMessage(WPARAM wParam, LPARAM lParam);
 public:
-//	afx_msg void OnBnClickedButtonWaitingAcceptClose();
-//	afx_msg void OnBnClickedButtonWaitingAcceptDelete();
 	afx_msg void OnBnClickedButtonAccept();
 	afx_msg void OnBnClickedButtonSevConnectingClose();
 	afx_msg void OnBnClickedButtonSevConnectingDelete();
@@ -112,9 +103,6 @@ public:
 	afx_msg void OnBnClickedButtonCliConnectingDelete();
 protected:
 	void AllListUpDateView();
-public:
-//	afx_msg void OnBnClickedButton1();
-protected:
 	CListCtrlForSocket m_ListSevCreate;
 public:
 	afx_msg void OnBnClickedButtonSevNew();
@@ -130,7 +118,6 @@ public:
 	afx_msg void OnBnClickedButtonCliSendText();
 	afx_msg void OnBnClickedButtonSevConnectingReceive();
 	afx_msg void OnBnClickedButtonListenShutdown();
-//	afx_msg void OnBnClickedRadio3();
 protected:
 	CButton m_RadioShutdownReceives;
 	CButton m_RadioShutdownSends;
@@ -153,4 +140,7 @@ protected:
 	CButton m_ButtonSevSendText;
 	CButton m_ButtonCliSendBinary;
 	CButton m_ButtonCliSendText;
+	CButton m_CheckSocketBufferChange;
+	CEditNum m_EditSocketBuffer;
+	CSpinButtonCtrl m_SpinSocketBuffer;
 };

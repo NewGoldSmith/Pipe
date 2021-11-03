@@ -31,13 +31,6 @@ public:
 // 実装
 protected:
 	DECLARE_MESSAGE_MAP()
-public:
-//	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-//	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-protected:
-//	CWnd* m_pButton;
-public:
-//	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -50,8 +43,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
-//	ON_WM_KEYDOWN()
-//ON_WM_CTLCOLOR()
+
 END_MESSAGE_MAP()
 
 
@@ -87,14 +79,10 @@ void MainDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_CLI_CREATE, m_ListCliCreate);
 	DDX_Control(pDX, IDC_LIST_SEV_ACCEPTED, m_ListSevConnected);
 	DDX_Control(pDX, IDC_LIST_CLI_ACCEPTED, m_ListCliConnected);
-	//  DDX_Control(pDX, IDC_EDIT_SEV_BINARY_FOR_SENDING, m_EditSevBinaryForSending);
-	//  DDX_Control(pDX, IDC_EDIT_SEV_TEXT_FOR_SENDING, m_EditSevTextForSending);
-	//  DDX_Control(pDX, IDC_EDIT_CLI_BINARY_FOR_SENDING, m_EditCliBinaryForSending);
-	//  DDX_Control(pDX, IDC_EDIT_CLI_TEXT_FOR_SENDING, m_EditCliTextForSending);
 	DDX_Control(pDX, IDC_EDIT_SEV_RECEIVED_BINARY, m_EditSevReceivedBinary);
 	DDX_Control(pDX, IDC_EDIT_SEV_RECEIVED_TEXT, m_EditSevReceivedText);
 	DDX_Control(pDX, IDC_EDIT_CLI_RECEIVED_BINARY, m_EditCliReceivedBinary);
-	DDX_Control(pDX, IDC_EDIT_CLI_RECEIVED_TEXT, m_EditCliRedeivedText);
+	DDX_Control(pDX, IDC_EDIT_CLI_RECEIVED_TEXT, m_EditCliReceivedText);
 	DDX_Control(pDX, IDC_LIST_SEV_CREATE, m_ListSevCreate);
 	DDX_Control(pDX, IDC_RADIO_SHUTDOWN_FLAG_RECEIVES, m_RadioShutdownReceives);
 	DDX_Control(pDX, IDC_RADIO_SHUTDOWN_FLAG_SENDS, m_RadioShutdownSends);
@@ -107,6 +95,9 @@ void MainDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_SEV_SEND_TEXT, m_ButtonSevSendText);
 	DDX_Control(pDX, IDC_BUTTON_CLI_SEND_BINARY, m_ButtonCliSendBinary);
 	DDX_Control(pDX, IDC_BUTTON_CLI_SEND_TEXT, m_ButtonCliSendText);
+	DDX_Control(pDX, IDC_CHECK_SOCKET_BUFFER_CHANGE_FROM_DEFAULT_BUFFER_SIZE, m_CheckSocketBufferChange);
+	DDX_Control(pDX, IDC_EDIT_SOCKET_BUFFER_SIZE, m_EditSocketBuffer);
+	DDX_Control(pDX, IDC_SPIN_SOCKET_BUFFER_SIZE, m_SpinSocketBuffer);
 }
 
 BEGIN_MESSAGE_MAP(MainDlg, CDialogEx)
@@ -227,6 +218,10 @@ BOOL MainDlg::OnInitDialog()
 	m_ComboSevTextForSending.Init(&m_ButtonSevSendText);
 	m_ComboCliBynaryForSending.Init(&m_ButtonCliSendBinary);
 	m_ComboCliTextForSending.Init(&m_ButtonCliSendText);
+
+	m_SpinSocketBuffer.SetRange32(0x0, 0x7fffffff);
+	m_SpinSocketBuffer.SetBuddy(&m_EditSocketBuffer);
+
 	return TRUE;  // フォーカスをコントロールに設定した場合を除き、TRUE を返します。
 }
 
@@ -333,6 +328,10 @@ void MainDlg::LoadProfile()
 
 	strSec = _T("COMBO_CLI_TEXT");
 	m_ComboCliTextForSending.LoadProfile(pApp->m_pszProfileName, strSec);
+
+	strSec = _T("SOCKET_OPTION");
+	m_EditSocketBuffer.SetWindowText(pApp->GetProfileString(strSec, _T("BUFFER_SIZE"), _T("5000")));
+	m_CheckSocketBufferChange.SetCheck(pApp->GetProfileInt(strSec, _T("BUFFER_CHANGE"), BST_UNCHECKED));
 }
 
 
@@ -386,6 +385,12 @@ void MainDlg::SaveProfile()
 
 	strSec = _T("COMBO_CLI_TEXT");
 	m_ComboCliTextForSending.SaveProfile(pApp->m_pszProfileName, strSec);
+
+	strSec = _T("SOCKET_OPTION");
+	CString strNBuffer;
+	m_EditSocketBuffer.GetWindowText(strNBuffer);
+	pApp->WriteProfileString(strSec, _T("BUFFER_SIZE"), strNBuffer);
+	pApp->WriteProfileInt(strSec,_T("BUFFER_CHANGE"),m_CheckSocketBufferChange.GetCheck());
 }
 
 
@@ -468,6 +473,17 @@ void MainDlg::OnBnClickedButtonListenCreate()
 		pSocket->ErrMessageBox();
 		return;
 	}
+
+	if (m_CheckSocketBufferChange.GetCheck() == BST_CHECKED)
+	{
+		int nBfferSize = m_EditSocketBuffer.GetNum();
+		if (!pSocket->SetSockOpt(SO_RCVBUF, &nBfferSize, sizeof(int), SOL_SOCKET))
+		{
+			pSocket->ErrMessageBox();
+			return;
+		}
+	}
+
 	m_ListListenCreate.UpDateView();
 }
 
@@ -528,6 +544,15 @@ void MainDlg::OnBnClickedButtonCliCreate()
 	{
 		pSocket->ErrMessageBox();
 		return;
+	}
+	if (m_CheckSocketBufferChange.GetCheck() == BST_CHECKED)
+	{
+		int nBfferSize = m_EditSocketBuffer.GetNum();
+		if (!pSocket->SetSockOpt(SO_RCVBUF, &nBfferSize, sizeof(int), SOL_SOCKET))
+		{
+			pSocket->ErrMessageBox();
+			return;
+		}
 	}
 	m_ListCliCreate.UpDateView();
 }
@@ -769,6 +794,15 @@ void MainDlg::OnBnClickedButtonSevCreate()
 		pSocket->ErrMessageBox();
 		return;
 	}
+	if (m_CheckSocketBufferChange.GetCheck() == BST_CHECKED)
+	{
+		int nBfferSize = m_EditSocketBuffer.GetNum();
+		if (!pSocket->SetSockOpt(SO_RCVBUF, &nBfferSize, sizeof(int), SOL_SOCKET))
+		{
+			pSocket->ErrMessageBox();
+			return;
+		}
+	}
 	m_ListSevCreate.UpDateView();
 }
 
@@ -834,7 +868,6 @@ void MainDlg::OnBnClickedButtonCliConnectingReceive()
 		pSocket->ErrMessageBox();
 		return;
 	}
-//	byteData[rVal] = L'\0';
 
 	StringHelper SH;
 	CString str;
@@ -844,15 +877,19 @@ void MainDlg::OnBnClickedButtonCliConnectingReceive()
 		SH.ErrMessageBox();
 		return;
 	}
+	if (i > 20)
+	{
+		str.Delete(0, i - 20);
+	}
 	m_EditCliReceivedBinary.SetWindowText(str);
 
 	std::wstring stdWStr = SH.utf8_to_wide(byteData);
 	CStringW strOld;
-	m_EditCliRedeivedText.GetWindowTextW(strOld);
+	m_EditCliReceivedText.GetWindowTextW(strOld);
 	strOld += stdWStr.c_str();
-	m_EditCliRedeivedText.SetWindowText(strOld);
-	int nLine = m_EditCliRedeivedText.GetLineCount();
-	m_EditCliRedeivedText.LineScroll(nLine);
+	m_EditCliReceivedText.SetWindowText(strOld);
+	int nLine = m_EditCliReceivedText.GetLineCount();
+	m_EditCliReceivedText.LineScroll(nLine);
 	m_ListCliConnected.UpDateView();
 }
 
@@ -860,7 +897,7 @@ void MainDlg::OnBnClickedButtonCliConnectingReceive()
 
 void MainDlg::OnBnClickedButtonCliClearText()
 {
-	m_EditCliRedeivedText.SetWindowTextW(_T(""));
+	m_EditCliReceivedText.SetWindowTextW(_T(""));
 }
 
 
