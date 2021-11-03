@@ -76,6 +76,10 @@
 #define IDC_COMBO_SEV_TEXT_FOR_SENDING  1075
 #define IDC_COMBO3                      1076
 #define IDC_COMBO_CLI_TEXT_FOR_SENDING  1076
+#define IDC_CHECK_SOCKET_BUFFER_CHANGE_FROM_DEFAULT_BUFFER_SIZE 1077
+#define IDC_EDIT_SOCKET_BUFFER_SIZE     1078
+#define IDC_SPIN_BUFFER_SIZE            1079
+#define IDC_SPIN_SOCKET_BUFFER_SIZE     1079
 
 // Next default values for new objects
 // 
@@ -83,7 +87,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1077
+#define _APS_NEXT_CONTROL_VALUE         1080
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

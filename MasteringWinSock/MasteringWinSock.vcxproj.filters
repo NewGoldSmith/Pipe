@@ -57,6 +57,9 @@
     <ClInclude Include="CListBoxComboSub.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="CEditNum.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MasteringWinSock.cpp">
@@ -90,6 +93,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="CListBoxComboSub.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="CEditNum.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

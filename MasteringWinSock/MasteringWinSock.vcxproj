@@ -201,6 +201,7 @@
   <ItemGroup>
     <ClInclude Include="CComboBoxDX.h" />
     <ClInclude Include="CEditComboSub.h" />
+    <ClInclude Include="CEditNum.h" />
     <ClInclude Include="CListBoxComboSub.h" />
     <ClInclude Include="StringHelper.h" />
     <ClInclude Include="CIPAddressCtrlDX.h" />
@@ -217,6 +218,7 @@
   <ItemGroup>
     <ClCompile Include="CComboBoxDX.cpp" />
     <ClCompile Include="CEditComboSub.cpp" />
+    <ClCompile Include="CEditNum.cpp" />
     <ClCompile Include="CListBoxComboSub.cpp" />
     <ClCompile Include="StringHelper.cpp" />
     <ClCompile Include="CIPAddressCtrlDX.cpp" />
