@@ -80,6 +80,10 @@
 #define IDC_EDIT_SOCKET_BUFFER_SIZE     1078
 #define IDC_SPIN_BUFFER_SIZE            1079
 #define IDC_SPIN_SOCKET_BUFFER_SIZE     1079
+#define IDC_CHECK_BACK_LOG_CHANGE_FROM_DEFAULT 1080
+#define IDC_EDIT_BACK_LOG_SIZE          1081
+#define IDC_SPIN1                       1082
+#define IDC_SPIN_BACK_LOG_SIZE          1082
 
 // Next default values for new objects
 // 
@@ -87,7 +91,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1080
+#define _APS_NEXT_CONTROL_VALUE         1083
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
