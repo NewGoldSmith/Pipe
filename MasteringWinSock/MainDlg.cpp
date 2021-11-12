@@ -98,6 +98,9 @@ void MainDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK_SOCKET_BUFFER_CHANGE_FROM_DEFAULT_BUFFER_SIZE, m_CheckSocketBufferChange);
 	DDX_Control(pDX, IDC_EDIT_SOCKET_BUFFER_SIZE, m_EditSocketBuffer);
 	DDX_Control(pDX, IDC_SPIN_SOCKET_BUFFER_SIZE, m_SpinSocketBuffer);
+	DDX_Control(pDX, IDC_CHECK_BACK_LOG_CHANGE_FROM_DEFAULT, m_CheckBackLogChange);
+	DDX_Control(pDX, IDC_EDIT_BACK_LOG_SIZE, m_EditBackLog);
+	DDX_Control(pDX, IDC_SPIN_BACK_LOG_SIZE, m_SpinBackLog);
 }
 
 BEGIN_MESSAGE_MAP(MainDlg, CDialogEx)
@@ -222,6 +225,9 @@ BOOL MainDlg::OnInitDialog()
 	m_SpinSocketBuffer.SetRange32(0x0, 0x7fffffff);
 	m_SpinSocketBuffer.SetBuddy(&m_EditSocketBuffer);
 
+	m_SpinBackLog.SetRange32(0x0, 0x7fffffff);
+	m_SpinBackLog.SetBuddy(&m_EditBackLog);
+
 	return TRUE;  // フォーカスをコントロールに設定した場合を除き、TRUE を返します。
 }
 
@@ -278,7 +284,7 @@ HCURSOR MainDlg::OnQueryDragIcon()
 
 void MainDlg::LoadProfile()
 {
-	StringHelper SH;
+	CString CovStr;//Used for string conversion.
 	CWinApp* pApp = AfxGetApp();
 	CString strSec(_T("SYSTEM"));
 	m_bFirst_Appear = pApp->GetProfileInt(strSec, _T("FIRST_APPEAR"), TRUE);
@@ -301,16 +307,15 @@ void MainDlg::LoadProfile()
 	m_IPAddressConnectToAddress.SetAddress(dw);
 
 	strSec = _T("PORT");
-	CString strPort;
 	dw = pApp->GetProfileInt(strSec, _T("LISTEN_PORT"), 50000);
-	strPort.Format(_T("%u"), dw);
-	m_EditListenPort.SetWindowTextW(strPort);
+	CovStr.Format(_T("%u"), dw);
+	m_EditListenPort.SetWindowTextW(CovStr);
 	dw = pApp->GetProfileInt(strSec, _T("CLI_PORT"), 0);
-	strPort.Format(_T("%u"), dw);
-	m_EditCliPort.SetWindowTextW(strPort);
+	CovStr.Format(_T("%u"), dw);
+	m_EditCliPort.SetWindowTextW(CovStr);
 	dw = pApp->GetProfileInt(strSec, _T("CONNECT_TO_PORT"), 50000);
-	strPort.Format(_T("%u"), dw);
-	m_EditConnectToPort.SetWindowTextW(strPort);
+	CovStr.Format(_T("%u"), dw);
+	m_EditConnectToPort.SetWindowTextW(CovStr);
 
 	int num;
 	strSec = _T("SHUTDOWN_HOW");
@@ -332,6 +337,12 @@ void MainDlg::LoadProfile()
 	strSec = _T("SOCKET_OPTION");
 	m_EditSocketBuffer.SetWindowText(pApp->GetProfileString(strSec, _T("BUFFER_SIZE"), _T("5000")));
 	m_CheckSocketBufferChange.SetCheck(pApp->GetProfileInt(strSec, _T("BUFFER_CHANGE"), BST_UNCHECKED));
+
+	strSec = _T("BACK_LOG");
+	dw = pApp->GetProfileInt(strSec, _T("BACK_LOG"), 5);
+	CovStr.Format(_T("%u"), dw);
+	m_EditBackLog.SetWindowTextW(CovStr);
+	m_CheckBackLogChange.SetCheck(pApp->GetProfileInt(strSec, _T("BACK_LOG_CHANGE"), BST_UNCHECKED));
 }
 
 
@@ -361,7 +372,6 @@ void MainDlg::SaveProfile()
 	pApp->WriteProfileInt(strSec, _T("IP_ADDRESS_CONNECT_TO"), dw);
 
 	strSec = _T("PORT");
-	CString strPort;
 	dw=m_SpinListenPort.GetPos32();
 	pApp->WriteProfileInt(strSec, _T("LISTEN_PORT"), dw);
 	dw = m_SpinCliPort.GetPos32();
@@ -391,6 +401,12 @@ void MainDlg::SaveProfile()
 	m_EditSocketBuffer.GetWindowText(strNBuffer);
 	pApp->WriteProfileString(strSec, _T("BUFFER_SIZE"), strNBuffer);
 	pApp->WriteProfileInt(strSec,_T("BUFFER_CHANGE"),m_CheckSocketBufferChange.GetCheck());
+
+	strSec = _T("BACK_LOG");
+	dw = m_SpinBackLog.GetPos32();
+	pApp->WriteProfileInt(strSec, _T("BACK_LOG"), dw);
+	pApp->WriteProfileInt(strSec, _T("BACK_LOG_CHANGE"), m_CheckBackLogChange.GetCheck());
+
 }
 
 
@@ -502,9 +518,23 @@ void MainDlg::OnBnClickedButtonListenListen()
 		m_ListListenCreate.ErrMessageBox();
 		return;
 	}
-	if (!pSocket->Listen())
+	if (m_CheckBackLogChange.GetCheck() == BST_CHECKED)
 	{
-		pSocket->ErrMessageBox();
+		CString str;
+		m_EditBackLog.GetWindowText(str);
+		int nBacklog = _ttoi(str);
+		if (!pSocket->Listen(nBacklog))
+		{
+			pSocket->ErrMessageBox();
+		}
+	}
+	else
+	{
+
+		if (!pSocket->Listen())
+		{
+			pSocket->ErrMessageBox();
+		}
 	}
 	m_ListListenCreate.UpDateView();
 }
@@ -619,7 +649,6 @@ void MainDlg::OnBnClickedButtonCliConnect()
 afx_msg LRESULT MainDlg::OnUserPipeListenMessage(WPARAM wParam, LPARAM lParam)
 {
 	int i = 0;
-	CAsyncSocketDX* pSocket;
 	switch (lParam)
 	{
 	case (LPARAM)CAsyncSocketDX::Event::OnAccept:
@@ -861,9 +890,9 @@ void MainDlg::OnBnClickedButtonCliConnectingReceive()
 		return;
 	}
 	char8_t byteData[BUF_SIZE] = {};
-	int rVal = 0;
-	rVal = pSocket->Receive(byteData, BUF_SIZE,0);
-	if (rVal == SOCKET_ERROR)
+	int nRecByte = 0;
+	nRecByte = pSocket->Receive(byteData, BUF_SIZE,0);
+	if (nRecByte == SOCKET_ERROR)
 	{
 		pSocket->ErrMessageBox();
 		return;
@@ -871,7 +900,7 @@ void MainDlg::OnBnClickedButtonCliConnectingReceive()
 
 	StringHelper SH;
 	CString str;
-	int i= SH.ByteDataToText(byteData, rVal, str);
+	int i= SH.ByteDataToHexText(byteData, nRecByte, str);
 	if (i == -1)
 	{
 		SH.ErrMessageBox();
@@ -883,7 +912,10 @@ void MainDlg::OnBnClickedButtonCliConnectingReceive()
 	}
 	m_EditCliReceivedBinary.SetWindowText(str);
 
-	std::wstring stdWStr = SH.utf8_to_wide(byteData);
+	char8_t szText[BUF_SIZE];
+	int numText = SH.RemoveNullChar(byteData, nRecByte, szText, BUF_SIZE);
+	szText[numText] = '\0';
+	std::wstring stdWStr = SH.Utf8SZtoWideSZ(szText);
 	CStringW strOld;
 	m_EditCliReceivedText.GetWindowTextW(strOld);
 	strOld += stdWStr.c_str();
@@ -917,7 +949,7 @@ void MainDlg::OnBnClickedButtonSevSendText()
 	m_ComboSevTextForSending.GetWindowTextW(str);
 	//\r\n\tエスケープコードに変換。
 	str=SH.TranslateEscape(str);
-	byteData = SH.wide_to_utf8(std::wstring(str));
+	byteData = SH.WideSZtoUtf8SZ(std::wstring(str));
 	nByte = byteData.length();
 	int len = pSocket->Send(byteData.c_str(), nByte);
 	if (len == SOCKET_ERROR)
@@ -982,7 +1014,7 @@ void MainDlg::OnBnClickedButtonCliSendText()
 	m_ComboCliTextForSending.GetWindowTextW(str);
 	//\r\n\tエスケープコードに変換。
 	str = SH.TranslateEscape(str);
-	byteData = SH.wide_to_utf8(std::wstring(str));
+	byteData = SH.WideSZtoUtf8SZ(std::wstring(str));
 	nByte = byteData.length();
 	int len = pSocket->Send(byteData.c_str(), nByte);
 	if (len == SOCKET_ERROR)
@@ -1003,18 +1035,18 @@ void MainDlg::OnBnClickedButtonSevConnectingReceive()
 		return;
 	}
 	char8_t byteData[BUF_SIZE] = {};
-	int rVal = 0;
-	rVal = pSocket->Receive(byteData, BUF_SIZE, 0);
-	if (rVal == SOCKET_ERROR)
+	int nRecByte = 0;
+	nRecByte = pSocket->Receive(byteData, BUF_SIZE, 0);
+	if (nRecByte == SOCKET_ERROR)
 	{
 		pSocket->ErrMessageBox();
 		return;
 	}
-	byteData[rVal] = L'\0';
+	byteData[nRecByte] = L'\0';
 
 	StringHelper SH;
 	CString str;
-	int i = SH.ByteDataToText(byteData, rVal, str);
+	int i = SH.ByteDataToHexText(byteData, nRecByte, str);
 	if (i == -1)
 	{
 		SH.ErrMessageBox();
@@ -1022,7 +1054,10 @@ void MainDlg::OnBnClickedButtonSevConnectingReceive()
 	}
 	m_EditSevReceivedBinary.SetWindowText(str);
 
-	std::wstring stdWStr = SH.utf8_to_wide(byteData);
+	char8_t szText[BUF_SIZE];
+	int numText=SH.RemoveNullChar(byteData, nRecByte, szText, BUF_SIZE);
+	szText[numText] = '\0';
+	std::wstring stdWStr = SH.Utf8SZtoWideSZ(szText);
 	CStringW strOld;
 	m_EditSevReceivedText.GetWindowTextW(strOld);
 	strOld += stdWStr.c_str();

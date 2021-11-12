@@ -143,4 +143,7 @@ protected:
 	CButton m_CheckSocketBufferChange;
 	CEditNum m_EditSocketBuffer;
 	CSpinButtonCtrl m_SpinSocketBuffer;
+	CButton m_CheckBackLogChange;
+	CEditNum m_EditBackLog;
+	CSpinButtonCtrl m_SpinBackLog;
 };
