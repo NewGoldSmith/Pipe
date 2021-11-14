@@ -53,6 +53,7 @@ END_MESSAGE_MAP()
 
 MainDlg::MainDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_MASTERINGWINSOCK_DIALOG, pParent)
+	,m_bFirst_Appear(TRUE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_ListenID = 0;
@@ -1195,4 +1196,5 @@ int MainDlg::SetShutdownHowCheck(int nHow)
 	}
 	return oldHow;
 }
+
 
