@@ -10,13 +10,16 @@
 
 IMPLEMENT_DYNAMIC(CEditComboSub, CEdit)
 
-CEditComboSub::CEditComboSub()
+CEditComboSub::CEditComboSub():CEdit()
+,m_pButton(NULL)
+,m_pListBox(NULL)
 {
 
 }
 
 CEditComboSub::~CEditComboSub()
 {
+	CEdit::~CEdit();
 }
 
 
@@ -100,3 +103,4 @@ CButton* CEditComboSub::SetButton(CButton* pButton)
 	m_pButton = pButton;
 	return nullptr;
 }
+
