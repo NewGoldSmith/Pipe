@@ -907,10 +907,6 @@ void MainDlg::OnBnClickedButtonCliConnectingReceive()
 		SH.ErrMessageBox();
 		return;
 	}
-	if (i > 20)
-	{
-		str.Delete(0, i - 20);
-	}
 	m_EditCliReceivedBinary.SetWindowText(str);
 
 	char8_t szText[BUF_SIZE];
