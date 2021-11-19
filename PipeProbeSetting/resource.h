@@ -2,6 +2,7 @@
 // Microsoft Visual C++ で生成されたインクルード ファイル。
 // PipeProbeSetting.rc で使用
 //
+//#define WS_EX_COMPOSITED
 #define IDM_ABOUTBOX                    0x0010
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
