@@ -669,10 +669,22 @@ afx_msg LRESULT MainDlg::OnUserPipeServerMessage(WPARAM wParam, LPARAM lParam)
 	int i = 0;
 	switch (lParam)
 	{
-	case (LPARAM)CAsyncSocketDX::Event::OnClose:
+	case (LPARAM)CAsyncSocketDX::Event::OnConnect:
+		i = 1;
+		break;
+	case (LPARAM)CAsyncSocketDX::Event::OnSend:
 		i = 1;
 		break;
 	case (LPARAM)CAsyncSocketDX::Event::Err:
+		i = 1;
+		break;
+	case (LPARAM)CAsyncSocketDX::Event::OnClose:
+		i = 1;
+		break;
+	case (LPARAM)CAsyncSocketDX::Event::OnReceive:
+		i = 1;
+		break;
+	case (LPARAM)CAsyncSocketDX::Event::OnAccept:
 		i = 1;
 		break;
 	}
@@ -695,7 +707,15 @@ afx_msg LRESULT MainDlg::OnUserPipeClientMessage(WPARAM wParam, LPARAM lParam)
 		i = 1;
 		break;
 	case (LPARAM)CAsyncSocketDX::Event::Err:
+		i = 1;
+		break;
 	case (LPARAM)CAsyncSocketDX::Event::OnClose:
+		i = 1;
+		break;
+	case (LPARAM)CAsyncSocketDX::Event::OnReceive:
+		i = 1;
+		break;
+	case (LPARAM)CAsyncSocketDX::Event::OnAccept:
 		break;
 	}
 	AllListUpDateView();
