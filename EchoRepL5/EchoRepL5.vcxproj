@@ -24,6 +24,7 @@
     <ProjectGuid>{cfad8992-bd41-4618-8036-b31d625d671e}</ProjectGuid>
     <RootNamespace>EchoRepL5</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>EchoL5</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -75,31 +76,87 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <PublicIncludeDirectories>
+    </PublicIncludeDirectories>
+    <IncludePath>$(SolutionDir)CommonLib;D:\C++LIB\vcpkg\installed\x86-windows\include;$(SolutionDir)CommonLib;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath);$(WindowsSDK_LibraryPath)\$(LibrariesArchitecture)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)CommonLib;D:\C++LIB\vcpkg\installed\x86-windows\include;$(SolutionDir)CommonLib;$(IncludePath)</IncludePath>
+    <PublicIncludeDirectories>
+    </PublicIncludeDirectories>
+    <LibraryPath>$(LibraryPath);$(WindowsSDK_LibraryPath)\$(LibrariesArchitecture)</LibraryPath>
+    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <PublicIncludeDirectories>
+    </PublicIncludeDirectories>
+    <IncludePath>$(SolutionDir)CommonLib;D:\C++LIB\vcpkg\installed\x64-windows-static\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\C++LIB\vcpkg\installed\x64-windows-static\$(Configuration)\lib;$(WindowsSDK_LibraryPath)\$(LibrariesArchitecture);C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.30.30705\lib;$(VC_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)CommonLib;D:\C++LIB\vcpkg\installed\x64-windows-static\include;$(IncludePath)</IncludePath>
+    <PublicIncludeDirectories>
+    </PublicIncludeDirectories>
+    <LibraryPath>D:\C++LIB\vcpkg\installed\x64-windows-static\lib;$(WindowsSDK_LibraryPath)\$(LibrariesArchitecture);$(VC_LibraryPath_x64)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgConfiguration>Debug</VcpkgConfiguration>
+    <VcpkgInstalledDir>D:\C++LIB\vcpkg</VcpkgInstalledDir>
+    <VcpkgTriplet>x32</VcpkgTriplet>
+    <VcpkgHostTriplet>windows</VcpkgHostTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgConfiguration>
+    </VcpkgConfiguration>
+    <VcpkgInstalledDir>D:\C++LIB\vcpkg</VcpkgInstalledDir>
+    <VcpkgTriplet>x32</VcpkgTriplet>
+    <VcpkgHostTriplet>windows</VcpkgHostTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgConfiguration>Debug</VcpkgConfiguration>
+    <VcpkgInstalledDir>D:\C++LIB\vcpkg</VcpkgInstalledDir>
+    <VcpkgTriplet>x64</VcpkgTriplet>
+    <VcpkgHostTriplet>windows</VcpkgHostTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgConfiguration>
+    </VcpkgConfiguration>
+    <VcpkgInstalledDir>D:\C++LIB\vcpkg</VcpkgInstalledDir>
+    <VcpkgTriplet>x64</VcpkgTriplet>
+    <VcpkgHostTriplet>windows</VcpkgHostTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnabled>false</VcpkgEnabled>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_NO_ASYNCRTIMP</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>I:\libiconv-1.16\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalUsingDirectories>$(SolutionDir)CommonLib;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>iconv.lib;charset.lib;Ws2_32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\C++LIB\vcpkg\installed\x86-windows\debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -108,29 +165,40 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_NO_ASYNCRTIMP</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalUsingDirectories>$(SolutionDir)CommonLib;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <AdditionalIncludeDirectories>I:\libiconv-1.16\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>iconv.lib;charset.lib;Ws2_32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\C++LIB\vcpkg\installed\x86-windows\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_NO_ASYNCRTIMP</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>D:\C++LIB\vcpkg\installed\x64-windows-static-md\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalUsingDirectories>$(SolutionDir)CommonLib;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Ws2_32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -139,22 +207,50 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_NO_ASYNCRTIMP</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalUsingDirectories>$(SolutionDir)CommonLib;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <AdditionalIncludeDirectories>D:\C++LIB\vcpkg\installed\x64-windows-static-md\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>iconv.lib;charset.lib;Ws2_32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\C++LIB\vcpkg\installed\x64-windows-static-md;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CAsyncSocketCon.cpp" />
+    <ClCompile Include="..\CommonLib\CByteData.cpp" />
+    <ClCompile Include="..\CommonLib\CommandLine.cpp" />
+    <ClCompile Include="..\CommonLib\CommandLineInfo.cpp" />
+    <ClCompile Include="..\CommonLib\CShowInfoPrompt.cpp" />
+    <ClCompile Include="..\CommonLib\CShowLicenseMIT.cpp" />
+    <ClCompile Include="..\CommonLib\SocketHelper.cpp" />
+    <ClCompile Include="CliWork.cpp" />
+    <ClCompile Include="CShowHelp.cpp" />
+    <ClCompile Include="CommandOpEchoRepL5.cpp" />
     <ClCompile Include="EchoRepL5.cpp" />
+    <ClCompile Include="SevWork.cpp" />
+    <ClCompile Include="stdPipeDetectEnd.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CAsyncSocketCon.h" />
+    <ClInclude Include="..\CommonLib\CByteData.h" />
+    <ClInclude Include="..\CommonLib\CommandLine.h" />
+    <ClInclude Include="..\CommonLib\CommandLineInfo.h" />
+    <ClInclude Include="..\CommonLib\CShowInfoPrompt.h" />
+    <ClInclude Include="..\CommonLib\CShowLicenseMIT.h" />
+    <ClInclude Include="..\CommonLib\SocketHelper.h" />
+    <ClInclude Include="CliWork.h" />
+    <ClInclude Include="CShowHelp.h" />
+    <ClInclude Include="CommandOpEchoRepL5.h" />
+    <ClInclude Include="EchoRepL5.h" />
+    <ClInclude Include="SevWork.h" />
+    <ClInclude Include="stdPipeDetectEnd.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
