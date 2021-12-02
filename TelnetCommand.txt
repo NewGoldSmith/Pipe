@@ -1,0 +1,40 @@
+0xF0	[Sub-negotiaon End] ２次交渉終了	２次交渉パラメータの終了
+0xF1	[No Operation] オペレーションなし	オペレーションなし。受信した側はこれを無視する
+0xF2	[Data Mark] データマーク	データ削除・リセット
+0xF3	[Break] ブレーク	ブレーク
+0xF4	[Interrupt Process] プロセス中断	操作の一時中断・割り込み・停止
+0xF5	[Abort Output] 出力中止	出力を抑止する
+0xF6	[Are You There] 相手確認	相手が動作しているかどうか確認する
+0xF7	[Erase Character] 文字消去	最後の文字を消去する
+0xF8	[Erase Line] 行消去	最後の行をすべて消去する
+0xF9	[Go Ahead] 送信勧誘	送信するように受信側にうながす
+0xFA	[Sub-negotiation Begin] ２次交渉開始	２次交渉の開始
+0xFB	WILL	オプション希望
+0xFC	WON'T	オプション拒絶
+0xFD	DO	オプション実行要求
+0xFE	DON'T	オプション使用中止
+0xFF	[Interpret as Command] コマンドとして解釈	telnetエスケープシーケンス
+
+相手にオプション使用を要求	DO	オプションを使用する	WILL
+オプションを使用しない	WON'T
+自分がオプション使用を宣言	WILL	オプションを許可する	DO
+オプションを許可しない	DON'T
+相手のオプション使用をやめさせる	WON'T	自身のオプションを無効にする	WON'T
+自分のオプションの無効化を宣言	DON'T	了解する	DON'T
+
+0x00	[Transmit Binary] バイナリ転送	IAC以外の文字列はバイナリデータと解釈される
+0x01	[Echo] エコー	データのエコー
+0x03	[Suppress Go Ahead] Go Ahead抑止	Go Aheadコマンドを使わないようにする
+0x05	[Telnet Status Option] telnet状態オプション	相手側のtelnetオプションの状態を見られるようにする
+0x06	[Telnet Timing Mark] telnetタイミングマーク	受信したデータが処理済ならばタイミングマークというデータを送る
+0x18	[Terminal Type] ターミナルタイプ	ターミナルタイプを交換可能にし、適切なターミナルタイプを設定する
+0x22	[Telnet Line Mode] telnetラインモード	行単位で転送できるようにする
+
+NUL	0	0x00	ヌル文字
+BEL	7	0x07	Bell文字
+BS	8	0x08	バックスペース文字
+HT	9	0x09	水平タブ
+LF	10	0x0A	改行
+VT	11	0x0B	垂直タブ
+FF	12	0x0C	フォームフィード
+CR	13	0x0D	復帰
