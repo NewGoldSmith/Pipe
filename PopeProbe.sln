@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WCmdCliant", "WCmdCliant\WC
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MasteringWinSock", "MasteringWinSock\MasteringWinSock.vcxproj", "{3D900CEB-76E5-4FCD-930C-FE679B7C11C4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EchoRepL5", "EchoRepL5\EchoRepL5.vcxproj", "{CFAD8992-BD41-4618-8036-B31D625D671E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EchoL5", "EchoRepL5\EchoRepL5.vcxproj", "{CFAD8992-BD41-4618-8036-B31D625D671E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
