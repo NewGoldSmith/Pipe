@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <corecrt_memcpy_s.h>
+#include <stdlib.h>
 
 //RAWデータを格納するクラス。文字列と違い途中に０が有ってもそこで終端としない。
 //その為、格納する際はサイズを指定する必要がある。

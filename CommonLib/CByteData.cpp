@@ -1,5 +1,5 @@
 #include "CByteData.h"
-#include <stdlib.h>
+
 
 CByteData& CByteData::operator=(const CByteData& OtherCByteData)
 {
