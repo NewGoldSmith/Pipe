@@ -3,146 +3,114 @@
 
 CByteData& CByteData::operator=(const CByteData& OtherCByteData)
 {
-	char8_t *pTemp = new char8_t[OtherCByteData.m_BufSize+1];
-	m_BufSize = OtherCByteData.m_BufSize;
-	memcpy_s(pTemp,m_BufSize+1, OtherCByteData.m_pData,OtherCByteData.m_DataSize+1);
-	m_DataSize = OtherCByteData.m_DataSize;
-	delete [] m_pData;
-	m_pData = pTemp;
+	CByteDataAtom* ptmp;
+	ptmp = OtherCByteData.m_pBDA;
+	ptmp->AddRef();
+	m_pBDA->Release();
+	m_pBDA = ptmp;
 	return *this;
 }
 
-CByteData& CByteData::operator+(const CByteData& ObjectCByteData)
+CByteData CByteData::operator+( CByteData ObjectCByteData)const
 {
-	int TotalBufSize = m_BufSize + ObjectCByteData.m_BufSize;
-	char8_t * pTmpBuf = new char8_t[TotalBufSize + 1];
-	memcpy_s(pTmpBuf, TotalBufSize, m_pData, m_DataSize);
-	memcpy_s(pTmpBuf + m_DataSize, TotalBufSize-m_DataSize, ObjectCByteData.m_pData, ObjectCByteData.m_DataSize);
-	delete[] m_pData;
-	m_pData = pTmpBuf;
-	m_BufSize = TotalBufSize;
-	m_DataSize += ObjectCByteData.m_DataSize;
-	m_pData[m_DataSize] = '\0';
-	return *this;
+	size_t TotalBufSize = m_pBDA->m_BufSize + ObjectCByteData.m_pBDA->m_BufSize;
+	size_t TotalDataSize = m_pBDA->m_DataSize + ObjectCByteData.m_pBDA->m_DataSize;
+	CByteDataAtom* pTmpBDA = new CByteDataAtom(TotalBufSize);
+	memcpy_s(pTmpBDA->m_pData, TotalBufSize, m_pBDA->m_pData, m_pBDA->m_DataSize);
+	memcpy_s(pTmpBDA->m_pData + m_pBDA->m_DataSize, TotalBufSize- m_pBDA->m_DataSize, ObjectCByteData.m_pBDA->m_pData, ObjectCByteData.m_pBDA->m_DataSize);
+	pTmpBDA->m_pData[TotalDataSize ] = '\0';
+	pTmpBDA->m_DataSize = TotalDataSize;
+	CByteData tmpByteData;
+	tmpByteData.m_pBDA->Release();
+	tmpByteData.m_pBDA = pTmpBDA;
+	return tmpByteData;
 }
 
 CByteData::operator const char8_t* ()  noexcept
 {
-	m_pData[m_DataSize];
-	return m_pData;
+	return m_pBDA->m_pData;
 }
 
-CByteData::CByteData():
-	m_BufSize(0)
-	, m_pData(NULL)
-	,m_DataSize(0)
+
+CByteData::CByteData(const CByteData & OtherCByteData)
 {
-	m_pData = new char8_t[1];
-	memset(m_pData, 0, 1);
-	m_pData[m_DataSize] = '\0';
+	m_pBDA = OtherCByteData.m_pBDA;
+	m_pBDA->AddRef();
 }
 
-CByteData::CByteData(const CByteData & OtherCByteData):
-	m_pData(NULL)
-	,m_BufSize(0)
+CByteData::CByteData(size_t Size)
+
 {
-	m_pData = new char8_t[OtherCByteData.m_BufSize + 1];
-	m_BufSize = OtherCByteData.m_BufSize;
-	memcpy_s(m_pData, m_BufSize+1, OtherCByteData.m_pData, OtherCByteData.m_BufSize+1);
-	m_DataSize = OtherCByteData.m_DataSize;
+	m_pBDA = new CByteDataAtom(Size);
+	m_pBDA->m_BufSize = Size;
+	memset(m_pBDA->m_pData, 0,Size+1);
+	m_pBDA->m_DataSize = 0;
 }
 
-CByteData::CByteData(int Size):
-	m_pData(NULL)
-	,m_BufSize(0)
-	,m_DataSize(0)
+CByteData::CByteData(const char8_t* const psrcData, size_t nSize)
 {
-	m_pData = new char8_t[Size+1];
-	memset(m_pData, 0,Size+1);
-	m_BufSize = Size;
-}
-
-CByteData::CByteData(const char8_t* const psrcData, int nSize):
-	m_pData(NULL)
-	,m_BufSize(0)
-{
-	if (m_BufSize < nSize)
-	{
-		delete[] m_pData;
-		m_BufSize = nSize;
-		m_pData = new char8_t[nSize + 1];
-	}
-	memcpy_s(m_pData, nSize, psrcData, nSize);
-	m_DataSize = nSize;
-	m_pData[m_DataSize] = '\0';
+	m_pBDA = new CByteDataAtom(nSize+1);
+	memcpy_s(m_pBDA->m_pData, nSize, psrcData, nSize);
+	m_pBDA->m_pData[nSize] = '\0';
+	m_pBDA->m_DataSize = nSize;
 }
 
 CByteData::~CByteData()
 {
-	delete [] m_pData;
-	m_pData = nullptr;
+	m_pBDA->Release();
+	m_pBDA = nullptr;
 }
 
 
-CByteData CByteData::SetByteData(const char8_t* const pData,int size)
+CByteData CByteData::SetByteData(const char8_t* const pData,size_t size)
 {
-	if (size > m_BufSize)
-	{
-		char8_t* pTmp = new char8_t[size + 1];
-		memcpy_s(pTmp, size, pData, size);
-		delete[] m_pData;
-		m_pData = pTmp;
-		m_BufSize = size;
-		m_DataSize = size;
-		m_pData[m_DataSize] = '\0';
-	}
-	else
-	{
-		memcpy_s(m_pData, size, pData, size);
-		m_DataSize = size;
-		m_pData[m_DataSize] = '\0';
-	}
+	CByteDataAtom *pTempBDA = new CByteDataAtom(__max(size,m_pBDA->m_BufSize));
+	memcpy(pTempBDA->m_pData, pData, size);
+	pTempBDA->m_pData[size] = '\0';
+	pTempBDA->m_DataSize = size;
+	m_pBDA->Release();
+	m_pBDA = pTempBDA;
 	return *this;
 }
 
 
 const char8_t* CByteData::c_str() const
 {
-	return m_pData;
+	return m_pBDA->m_pData;
 }
 
 
-CByteData& CByteData::SetBufReSize(const int size)
+CByteData& CByteData::SetBufReSize(const size_t size)
 {
-	char8_t *pTmp = new char8_t[size+1];
-	memcpy_s(pTmp, size, m_pData, __min(size,m_BufSize));
-	delete[] m_pData;
-	m_pData = pTmp;
-	m_BufSize = size;
-	m_DataSize = __min(size, m_DataSize);
-	m_pData[m_DataSize] = '\0';
+	CByteDataAtom *pTmp = new CByteDataAtom(size);
+	memcpy_s(pTmp->m_pData, size, m_pBDA->m_pData, __min(size,m_pBDA->m_BufSize));
+	pTmp->m_BufSize = size;
+	pTmp->m_DataSize = __min(size, m_pBDA->m_DataSize);
+	pTmp->m_pData[pTmp->m_DataSize] = '\0';
+	m_pBDA->Release();
+	m_pBDA = pTmp;
 	return *this;
 }
 
 
-int CByteData::GetBufSize()const
+size_t CByteData::GetBufSize()const
 {
-	return m_BufSize;
+	return m_pBDA->m_BufSize;
 }
 
 
-CByteData& CByteData::SetDataSize(const int size)
+CByteData& CByteData::SetDataSize(const size_t size)
 {
-	m_DataSize = size;
+	m_pBDA->m_DataSize=size;
 	return *this;
 }
 
-int CByteData::GetDataSize()const
+size_t CByteData::GetDataSize()const
 {
-	return m_DataSize;
+	return m_pBDA->m_DataSize;
 }
 
 char8_t*  CByteData::GetBuffer()
 {
-	return m_pData;
+	return m_pBDA->m_pData;
 }
