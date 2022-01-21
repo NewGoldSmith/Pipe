@@ -38,7 +38,7 @@ namespace SocketHelper
 			getsockname(Socket, (struct sockaddr*)&addr, &len);
 			HostPort = ntohs(addr.sin_port);
 			char strHostAddr[16]{};
-			inet_ntop(AF_INET,(struct in_addr*)&addr.sin_addr, strHostAddr,16);
+			::inet_ntop(AF_INET,(struct in_addr*)&addr.sin_addr, strHostAddr,16);
 
 			addr = {};
 			getpeername(Socket, (struct sockaddr*)&addr, &len);
@@ -62,9 +62,9 @@ namespace SocketHelper
 	}
 
 	//ソケットからCByteDataへデータを読み込む。
-	int SockRead(const SOCKET Socket, CByteData* pByteData)
+	int SockRead(const SOCKET Socket, CBinaryString* pByteData)
 	{
-		int len = recv(Socket, (char*)pByteData->GetBuffer(), pByteData->GetBufSize(), 0);
+		int len = recv(Socket, (char*)pByteData->GetBuffer8(), pByteData->GetBufSize(), 0);
 		if (len == SOCKET_ERROR)
 		{
 			pByteData->SetDataSize(0);
@@ -75,9 +75,9 @@ namespace SocketHelper
 	}
 
 	//CByteDataをソケットへデータを書き込む。
-	int SockWrite(const SOCKET Socket, const CByteData* pByteData)
+	int SockWrite(const SOCKET Socket, const CBinaryString* pByteData)
 	{
-		int rlen = send(Socket, (char*)pByteData->c_str(), pByteData->GetDataSize(), 0);
+		int rlen = send(Socket, (char*)pByteData->c_strA(), pByteData->GetDataSize(), 0);
 		return rlen;
 	}
 
