@@ -1,18 +1,30 @@
 #include "CShowLicenseMIT.h"
 
 CShowLicenseMIT::CShowLicenseMIT():CShowInfoPrompt()
+,m_strYearly{"2021,2022"}
+,m_strAppName{""}
 {
-	const char p[] = R"(
+}
 
-Echo layer 5 
+void CShowLicenseMIT::ShowPrompt()
+{
+	std::string str=m_strAppName+"\r\n"+m_strCopyright +m_strYearly+" " + m_strDescription;
+	m_TextSize = str.size();
+	m_Text = str;
+	CShowInfoPrompt::ShowPrompt();
+}
 
-Copyright (c) 2021 Gold Smith.
-Released under the MIT license.
-https://opensource.org/licenses/mit-license.php
-)";
-	m_TextSize = strnlen(p, 1024);
-	m_pText = new char[m_TextSize+1];
-	int err =strcpy_s(m_pText, m_TextSize+1, p);
+std::string CShowLicenseMIT::SetAppName(std::string strApp)
+{
+	std::string strOld = m_strAppName;
+	m_strAppName = strApp;
+	return strOld;
+}
 
+std::string CShowLicenseMIT::SetYearly(std::string strYearly)
+{
+	std::string strOld = m_strYearly;
+	m_strYearly = strYearly;
+	return strOld;
 }
 

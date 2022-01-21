@@ -1,0 +1,40 @@
+">" is to Counter Protocol message.
+">>" is message from Upper Layer.
+"<<" is message to UpperLayer.
+
+/*Greeting Phase*/
+<NPCP 1.1 ID02 PXY\r\n					//Net Pipe Connection Protocol 1.1 CliantSide
+>REP OK\r\n				//Reply immediately.
+>IM ID01 NPHUB\r\n		//Reply immediately.
+>>CONNECTED ID01 NPHUB\r\n
+>REP NG\r\n				//Reply immediately.
+<<CONNECTED ID02 PXY\r\n	//Reply immediately.
+/*exec Phase*/
+>>EXEC HTS 60 570043006D00640043006C00690061006E0074002E006500780065000000\r\n//ByteText from Upper Layer.
+>EXEC EXEC HTS 60 570043006D00640043006C00690061006E0074002E006500780065000000\r\n	
+<NOTE EXEC OK\r\n			//Reply immediately.
+<NOTE EXEC NG\r\n			//Reply immediately.
+<NOTE EXEC ALREADY_RUNNING\r\n //Reply immediately.
+<<ID02 NOTE EXEC OK\r\n		//Reply immediately.
+<<ID02 NOTE EXEC NG\r\n		//time out immediately.
+<<ID02 NOTE EXEC ALREADY_RUNNING\r\n //Reply immediately.
+<NOTE EXEC NG\r\n			//Reply immediately.
+<<ID02 NOTE EXEC NG\r\n		//Reply immediately.
+
+>>ID02 QUIT EXEC\r\n			//from UpperLayer
+>QUIT EXEC\r\n				//Operation Pipe Terminate
+>>ID02 QUIT PEER\r\n
+>QUIT PEER\r\n
+
+/*Transfer Phase*/
+>>ID02 SEND THS 4 FFFCOAOD\r\n
+>SEND THS 4 FFFCOAOD\r\n					//Send BD13 Data for pipes.
+
+<SEND THS 5 746573740A\r\n					//Send BD5
+<<ID02 RECEIVED THS 5 746573740A\r\n
+
+/*Notifi*/
+<NOTE DISCONNECTED EXEC\r\n
+<<ID02 NOTE DISCONNECTED EXEC\r\n
+
+<<ID02 NOTE DISCONNECTED PEER\r\n

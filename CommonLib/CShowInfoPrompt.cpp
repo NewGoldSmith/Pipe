@@ -3,22 +3,22 @@
 #include <atlchecked.h>
 
 
+
 CShowInfoPrompt::CShowInfoPrompt():
-	m_pText(nullptr)
+	m_Text("")
 	,m_TextSize(0)
 {
 }
 
 CShowInfoPrompt::~CShowInfoPrompt()
 {
-	delete [] m_pText;
 }
 
 void CShowInfoPrompt::ShowPrompt()
 {
-	if (m_pText != nullptr)
+	if (!m_Text.empty())
 	{
-		printf_s("%s", m_pText);
+		std::cout << m_Text;
 	}
 }
 
@@ -29,10 +29,10 @@ int CShowInfoPrompt::GetText(char* pDst, size_t DstSize)
 	{
 		return -1;
 	}
-	if (m_pText == nullptr)
+	if (m_Text.empty() )
 	{
 		return -1;
 	}
-	strcpy_s(pDst, m_TextSize, m_pText);
+	strcpy_s(pDst, m_TextSize, m_Text.c_str());
 	return 0;
 }

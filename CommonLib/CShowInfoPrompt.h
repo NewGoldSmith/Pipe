@@ -1,8 +1,7 @@
 #pragma once
 
-#include <tchar.h>
-#include <string.h>
-#include <stdio.h>
+#include <string>
+#include <iostream>
 
 class CShowInfoPrompt
 {
@@ -12,6 +11,6 @@ public:
 	virtual void ShowPrompt();
 	virtual int GetText(char* pDst, size_t DstSize);
 protected:
-	char *m_pText;
+	std::string m_Text;
 	size_t m_TextSize;
 };
