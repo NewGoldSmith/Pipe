@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "CommandLineInfo.h"
+#include <CommandLineInfo.h>
 class CommandLineInfo;
 class CommandLine
 {
