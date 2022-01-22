@@ -30,7 +30,7 @@
     <ClCompile Include="CProtoNPCP11.cpp" />
     <ClCompile Include="CShowInfoPrompt.cpp" />
     <ClCompile Include="CShowLicenseMIT.cpp" />
-    <ClCompile Include="CTCPSocket.cpp" />
+    <ClCompile Include="CBSSocket.cpp" />
     <ClCompile Include="CSecTimer.cpp" />
     <ClCompile Include="PipeHelper.cpp" />
     <ClCompile Include="SocketHelper.cpp" />
@@ -48,7 +48,7 @@
     <ClInclude Include="CProtoNPCP11.h" />
     <ClInclude Include="CShowInfoPrompt.h" />
     <ClInclude Include="CShowLicenseMIT.h" />
-    <ClInclude Include="CTCPSocket.h" />
+    <ClInclude Include="CBSSocket.h" />
     <ClInclude Include="CSecTimer.h" />
     <ClInclude Include="PipeHelper.h" />
     <ClInclude Include="SocketHelper.h" />
