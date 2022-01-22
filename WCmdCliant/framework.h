@@ -8,7 +8,7 @@
 
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS      // 一部の CString コンストラクターは明示的です。
 
-// 一般的で無視しても安全な MFC の警告メッセージの一部の非表示を解除します。
+	// 一般的で無視しても安全な MFC の警告メッセージの一部の非表示を解除します。
 #define _AFX_ALL_WARNINGS
 
 #include <afxwin.h>         // MFC のコアおよび標準コンポーネント
