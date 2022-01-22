@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <WinSock2.h>
-#include <CTCPSocket.h>
+#include <CBSSocket.h>
 #include <CPipeTerm.h>
 #include <CBinaryString.h>
 #include <WinExeEngine.h>
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 		wprintf(L"WSAStartup failed: %d\n", iResult);
 	}
 
-	CTCPCliSocket Socket;
+	CBSSocket Socket;
 	Socket.Create();
 	Socket.Bind(cmdOption.m_strHostAddress, cmdOption.m_HostPort);
 	Socket.Connect(cmdOption.m_strPeerAddress, cmdOption.m_PeerPort,cmdOption.m_BackLog);

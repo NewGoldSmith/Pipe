@@ -2,7 +2,7 @@
 //#include <WTypesbase.h>
 #include <WinExeEngine.h>
 #include <WinSock2.h>
-#include <CTCPSocket.h>
+#include <CBSSocket.h>
 #include <CPipeTerm.h>
 #include <CProtoNPCP11.h>
 class CPipeProxy :
