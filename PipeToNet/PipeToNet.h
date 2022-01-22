@@ -1,0 +1,10 @@
+#pragma once
+#include <iostream>
+#include <CommandLine.h>
+#include <CShowLicenseMIT.h>
+#include <SocketHelper.h>
+#include "CommandOpPipeToNet.h"
+#include "CShowHelp.h"
+#include <CBSSocket.h>
+#include "CStdPipe.h"
+//#include "Work.h"
