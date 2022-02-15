@@ -19,12 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CAsyncBStreamQue.cpp" />
     <ClCompile Include="CBStream.cpp" />
     <ClCompile Include="CBinaryString.cpp" />
     <ClCompile Include="CBinaryStringCore.cpp" />
+    <ClCompile Include="CBStreamQue.cpp" />
+    <ClCompile Include="CJointIntercept.cpp" />
+    <ClCompile Include="CJointStream.cpp" />
+    <ClCompile Include="CJointStream3.cpp" />
     <ClCompile Include="CommandLine.cpp" />
     <ClCompile Include="CommandLineInfo.cpp" />
     <ClCompile Include="CommandLineNetConnection.cpp" />
+    <ClCompile Include="CBStreamTerm.cpp" />
+    <ClCompile Include="CPConsole.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="CPipeTerm.cpp" />
     <ClCompile Include="CProtocolBD.cpp" />
     <ClCompile Include="CProtoNPCP11.cpp" />
@@ -32,17 +44,26 @@
     <ClCompile Include="CShowLicenseMIT.cpp" />
     <ClCompile Include="CBSSocket.cpp" />
     <ClCompile Include="CSecTimer.cpp" />
+    <ClCompile Include="CReadNumByte.cpp" />
     <ClCompile Include="PipeHelper.cpp" />
     <ClCompile Include="SocketHelper.cpp" />
+    <ClCompile Include="CBWinConv.cpp" />
     <ClCompile Include="WinExeEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CAsyncBStreamQue.h" />
     <ClInclude Include="CBStream.h" />
     <ClInclude Include="CBinaryString.h" />
     <ClInclude Include="CBinaryStringCore.h" />
+    <ClInclude Include="CBStreamQue.h" />
+    <ClInclude Include="CJointIntercept.h" />
+    <ClInclude Include="CJointStream.h" />
+    <ClInclude Include="CJointStream3.h" />
     <ClInclude Include="CommandLine.h" />
     <ClInclude Include="CommandLineInfo.h" />
     <ClInclude Include="CommandLineNetConnection.h" />
+    <ClInclude Include="CBStreamTerm.h" />
+    <ClInclude Include="CPConsole.h" />
     <ClInclude Include="CPipeTerm.h" />
     <ClInclude Include="CProtocolBD.h" />
     <ClInclude Include="CProtoNPCP11.h" />
@@ -50,9 +71,14 @@
     <ClInclude Include="CShowLicenseMIT.h" />
     <ClInclude Include="CBSSocket.h" />
     <ClInclude Include="CSecTimer.h" />
+    <ClInclude Include="CReadNumByte.h" />
     <ClInclude Include="PipeHelper.h" />
     <ClInclude Include="SocketHelper.h" />
+    <ClInclude Include="CBWinConv.h" />
     <ClInclude Include="WinExeEngine.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram2.cd" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -111,25 +137,29 @@
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)CommonLib\</OutDir>
-    <IncludePath>$(SolutionDir)CommonLib;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)CommonLib;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)-$(Configuration)-$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)CommonLib\</OutDir>
-    <IncludePath>$(SolutionDir)CommonLib;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)CommonLib;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)-$(Configuration)-$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)CommonLib\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)CommonLib;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)CommonLib;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)-$(Configuration)-$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)CommonLib\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)CommonLib;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)CommonLib;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)-$(Configuration)-$(PlatformTarget)</TargetName>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnabled>false</VcpkgEnabled>
@@ -145,6 +175,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BrowseInformationFile>$(ProjectDir)</BrowseInformationFile>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -152,7 +184,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <OutputFile>$(ProjectDir)$(TargetName)-$(Configuration)-$(Platform)$(TargetExt)</OutputFile>
+      <OutputFile>$(ProjectDir)$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -168,6 +200,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BrowseInformationFile>$(ProjectDir)</BrowseInformationFile>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -177,7 +211,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <OutputFile>$(ProjectDir)$(TargetName)-$(Configuration)-$(Platform)$(TargetExt)</OutputFile>
+      <OutputFile>$(ProjectDir)$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -191,6 +225,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BrowseInformationFile>$(ProjectDir)</BrowseInformationFile>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -198,7 +234,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <OutputFile>$(ProjectDir)$(TargetName)-$(Configuration)-$(Platform)$(TargetExt)</OutputFile>
+      <OutputFile>$(ProjectDir)$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -214,6 +250,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BrowseInformationFile>$(ProjectDir)</BrowseInformationFile>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -223,7 +261,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <OutputFile>$(ProjectDir)$(TargetName)-$(Configuration)-$(Platform)$(TargetExt)</OutputFile>
+      <OutputFile>$(ProjectDir)$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

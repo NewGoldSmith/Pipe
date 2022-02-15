@@ -14,6 +14,13 @@ public:
 protected:
 	struct stThreadParam
 	{
+		stThreadParam() :
+			Timer(0)
+			, pbTrigger(nullptr)
+			, count(0)
+			, bPause(0)
+			, bStop(0)
+			,pThisThread(nullptr) {};
 		time_t Timer;
 		bool* pbTrigger;
 		unsigned int count;
@@ -21,7 +28,7 @@ protected:
 		bool bStop;
 		std::thread* pThisThread;
 	};
-	stThreadParam m_ThreadParam{};
+	stThreadParam m_ThreadParam;
 	time_t m_Timer;
 	bool* m_pbTrigger;
 	void static CSecThread(stThreadParam* pParam);

@@ -64,6 +64,7 @@ namespace SocketHelper
 	//ソケットからCByteDataへデータを読み込む。
 	int SockRead(const SOCKET Socket, CBinaryString* pByteData)
 	{
+		pByteData->Clear();
 		int len = recv(Socket, (char*)pByteData->GetBuffer8(), pByteData->GetBufSize(), 0);
 		if (len == SOCKET_ERROR)
 		{

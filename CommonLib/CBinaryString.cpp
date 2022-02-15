@@ -1,11 +1,16 @@
+//Copyright (c) 2020 2021, Gold Smith
+//Released under the MIT license
+//https@://opensource.org/licenses/mit-license.php
+
 #include "CBinaryString.h"
 
 
 
 CBinaryString& CBinaryString::operator=(const CBinaryString &OtherCByteData)
 {
-	SetBinaryString8(OtherCByteData.c_str8(), OtherCByteData.GetDataSize());
-	SetBufReSize(OtherCByteData.GetBufSize());
+	OtherCByteData.m_pBDA->AddRef();
+	m_pBDA->Release();
+	m_pBDA = OtherCByteData.m_pBDA;
 	return *this;
 }
 
@@ -18,13 +23,6 @@ CBinaryString& CBinaryString::operator=(const char* strSz)
 CBinaryString& CBinaryString::operator=(const std::string str)
 {
 	SetTextStringA(str.c_str());
-	return *this;
-}
-
-CBinaryString& CBinaryString::operator()(CBinaryString&& OtherObj)
-{
-	m_pBDA = OtherObj.m_pBDA;
-	OtherObj.m_pBDA = new CBinaryStringCore(1024);
 	return *this;
 }
 
@@ -118,6 +116,11 @@ CBinaryString::operator const char* () noexcept
 	return (char *)m_pBDA->m_pData;
 }
 
+CBinaryString::operator const wchar_t* () noexcept
+{
+	return (wchar_t*)m_pBDA->m_pData;
+}
+
 CBinaryString::operator std::string()
 {
 	std::string str(c_strA());
@@ -128,7 +131,7 @@ CBinaryString::operator std::string()
 CBinaryString::CBinaryString() :
 	m_pBDA(nullptr)
 {
-	m_pBDA = new CBinaryStringCore(1024);
+	m_pBDA = new CBinaryStringCore(DefAlloc);
 }
 
 std::vector<std::string> CBinaryString::Split(const std::string str, const std::string separator)
@@ -156,13 +159,38 @@ std::vector<std::string> CBinaryString::Split(const std::string str, const std::
 	return result;
 }
 
-void CBinaryString::RemoveSpaceHexText()
+std::vector<std::wstring> CBinaryString::SplitW(const std::wstring wstr, const std::wstring wseparator)
+{
+	using namespace std;
+	if (wseparator == L"") return { wstr };
+	vector<wstring> result;
+	wstring twstr = wstr + wseparator;
+	size_t len = twstr.length(), splen = wseparator.length();
+	wstring::size_type pos = 0, prev = 0;
+
+	for (; pos < len && (pos = twstr.find(wseparator, pos)) != wstring::npos; prev = (pos += splen)) {
+		if (len != 0)
+		{
+			if (pos - prev <= 0)
+			{
+				break;
+			}
+			result.emplace_back(twstr, prev, pos - prev);
+		}
+		else {
+			break;
+		}
+	}
+	return result;
+}
+
+void CBinaryString::RemoveSpaceHexTextA()
 {
 	if (m_pBDA->m_DataSize <= 0)
 	{
 		return;
 	}
-	char8_t* pDest = new char8_t[m_pBDA->m_DataSize];
+	char8_t* pDest = new char8_t[m_pBDA->m_DataSize+2];
 	char8_t* pSource = m_pBDA->m_pData;
 	int SourIndex = 0;
 	int DestIndex = 0;
@@ -178,7 +206,7 @@ void CBinaryString::RemoveSpaceHexText()
 	delete [] pDest;
 }
 
-void CBinaryString::InsertSpaceHexText()
+void CBinaryString::InsertSpaceHexTextA()
 {
 	size_t BufSize = m_pBDA->m_DataSize * 3 / 2;
 	BufSize = __max(BufSize, m_pBDA->m_BufSize);
@@ -207,7 +235,6 @@ CBinaryString::CBinaryString( const CBinaryString  &OtherCByteData)
 }
 
 CBinaryString::CBinaryString(size_t Size)
-
 {
 	m_pBDA = new CBinaryStringCore(Size);
 }
@@ -215,44 +242,46 @@ CBinaryString::CBinaryString(size_t Size)
 CBinaryString::CBinaryString(const char DataSZ[])
 {
 	size_t len = strlen(DataSZ);
-	size_t maxbuf = __max(len, 1024);
+	size_t maxbuf = __max(len, DefAlloc);
 	m_pBDA = new CBinaryStringCore(maxbuf);
-	memcpy_s(m_pBDA->m_pData, len, DataSZ, len);
-	m_pBDA->m_pData[len] = '\0';
+	memcpy_s(m_pBDA->m_pData, maxbuf, DataSZ, len);
 	m_pBDA->m_DataSize = len;
-
 }
 
-CBinaryString::CBinaryString(CBinaryString&& OtherObj)noexcept:
-	m_pBDA(OtherObj.m_pBDA)
+CBinaryString::CBinaryString(const wchar_t DataSZ[])
 {
-	OtherObj.m_pBDA = new CBinaryStringCore(1023);
+	size_t len = wcslen(DataSZ);
+	size_t maxbuf = __max(len*sizeof(wchar_t), DefAlloc);
+	m_pBDA = new CBinaryStringCore(maxbuf);
+	wmemcpy((wchar_t*)m_pBDA->m_pData, DataSZ, len);
+	m_pBDA->m_DataSize = len*sizeof(wchar_t);
 }
 
-CBinaryString::CBinaryString(const char8_t*  psrcData, size_t nSize)
+CBinaryString::CBinaryString(const char8_t strSZ[])
 {
-	size_t size = __max(nSize, 1024);
-	m_pBDA = new CBinaryStringCore(size);
-	memcpy_s(m_pBDA->m_pData, nSize, psrcData, nSize);
-	m_pBDA->m_pData[nSize] = '\0';
-	m_pBDA->m_DataSize= nSize;
+	size_t len = strlen((char *)strSZ);
+	size_t maxbuf = __max(len, DefAlloc);
+	m_pBDA = new CBinaryStringCore(maxbuf);
+	memcpy_s(m_pBDA->m_pData, maxbuf, strSZ, len);
+	m_pBDA->m_DataSize = len;
 }
 
 CBinaryString::CBinaryString(const std::string str)
 {
 	size_t len = str.size();
-	size_t maxbuf = __max(len, 1024);
+	size_t maxbuf = __max(len, DefAlloc);
 	m_pBDA = new CBinaryStringCore(maxbuf);
-	memcpy_s(m_pBDA->m_pData, len, str.c_str(), len);
-	m_pBDA->m_pData[len] = '\0';
+	memcpy_s(m_pBDA->m_pData, maxbuf, str.c_str(), len);
 	m_pBDA->m_DataSize = len;
 }
 
-CBinaryString& CBinaryString::operator=(CBinaryString&& OtherObj)noexcept
+CBinaryString::CBinaryString(const std::wstring str)
 {
-	m_pBDA = OtherObj.m_pBDA;
-	OtherObj.m_pBDA = new CBinaryStringCore(1024);
-	return *this;
+	size_t len = str.size();
+	size_t maxbuf = __max(len*sizeof(wchar_t), DefAlloc);
+	m_pBDA = new CBinaryStringCore(maxbuf);
+	memcpy_s(m_pBDA->m_pData, maxbuf, str.c_str(), len * sizeof(wchar_t));
+	m_pBDA->m_DataSize = len * sizeof(wchar_t);
 }
 
 CBinaryString::~CBinaryString()
@@ -263,40 +292,69 @@ CBinaryString::~CBinaryString()
 CBinaryString& CBinaryString::SetTextStringA(const char* pDataSZ)
 {
 	size_t len = strlen(pDataSZ);
-	size_t maxsize = __max(len, m_pBDA->m_BufSize);
-	CBinaryStringCore *pBDA = new CBinaryStringCore(maxsize);
+	size_t maxsize = __max(len , m_pBDA->m_BufSize);
+	CBinaryStringCore* pBDA = new CBinaryStringCore(maxsize);
+
 	memcpy(pBDA->m_pData, pDataSZ, len);
-//	pBDA->m_pData[len] = '\0';
 	pBDA->m_DataSize = len;
 	m_pBDA->Release();
 	m_pBDA = pBDA;
 	return * this;
 }
 
+CBinaryString& CBinaryString::SetTextStringW(const wchar_t* pDataSZ)
+{
+	size_t len = wcslen(pDataSZ);
+	size_t wlen = len * sizeof(wchar_t);
+	size_t maxsize = __max(wlen, m_pBDA->m_BufSize);
+	CBinaryStringCore* pTemp = new CBinaryStringCore(maxsize);
+
+	memcpy(pTemp->m_pData, pDataSZ, wlen);
+	pTemp->m_DataSize = wlen;
+	m_pBDA->Release();
+	m_pBDA = pTemp;
+	return *this;
+}
+
 
 CBinaryString& CBinaryString::SetBinaryString8(const char8_t*  pData,size_t size)
 {
 	size_t maxsize = __max(size, m_pBDA->m_BufSize);
-	CBinaryStringCore* pBDA = new CBinaryStringCore(maxsize);
-	memcpy(pBDA->m_pData, pData, size);
-//	pBDA->m_pData[size] = '\0';
-	pBDA->m_DataSize = size;
+	CBinaryStringCore* pTemp=new CBinaryStringCore(maxsize);
+	
+	memcpy(pTemp->m_pData, pData, size);
+	pTemp->m_DataSize = size;
 	m_pBDA->Release();
-	m_pBDA = pBDA;
+	m_pBDA = pTemp;
 	return  * this;
 }
 
-CBinaryString& CBinaryString::SetBinaryStringW(const wchar_t* pData, size_t sizebyte)
+CBinaryString& CBinaryString::SetBinaryStringW(const wchar_t* pData, size_t wsize)
 {
-	size_t maxsize = __max(sizebyte+2, m_pBDA->m_BufSize-2);
-	CBinaryStringCore* pBDA = new CBinaryStringCore(maxsize);
-	memcpy(pBDA->m_pData, pData, sizebyte);
-	//pBDA->m_pData[sizebyte] = '\0';
-	//pBDA->m_pData[sizebyte + 1] = '\0';
-	pBDA->m_DataSize = sizebyte;
+	size_t size = wsize * sizeof(wchar_t);
+	size_t maxsize = __max(size, m_pBDA->m_BufSize);
+	CBinaryStringCore* pTemp = new CBinaryStringCore(maxsize);
+
+	memcpy(pTemp->m_pData, pData, size);
+	pTemp->m_DataSize = size;
 	m_pBDA->Release();
-	m_pBDA = pBDA;
+	m_pBDA = pTemp;
 	return  *this;
+}
+
+CBinaryString& CBinaryString::Clear()
+{
+	if (m_pBDA->m_RefCount > 1)
+	{
+		CBinaryStringCore* pBDA = new CBinaryStringCore(m_pBDA->m_BufSize);
+		m_pBDA->Release();
+		m_pBDA = pBDA;
+	}
+	else {
+		m_pBDA->m_DataSize = 0;
+	}
+
+	return *this;
 }
 
 
@@ -320,7 +378,6 @@ CBinaryString& CBinaryString::SetBufReSize(const size_t size)
 {
 	CBinaryStringCore *pTmp = new CBinaryStringCore(size);
 	memcpy_s(pTmp->m_pData, size, m_pBDA->m_pData, __min(size,m_pBDA->m_BufSize));
-	pTmp->m_BufSize= size;
 	pTmp->m_DataSize=__min(size, m_pBDA->m_DataSize);
 	pTmp->m_pData[pTmp->m_DataSize] = '\0';
 	m_pBDA->Release();
@@ -328,28 +385,85 @@ CBinaryString& CBinaryString::SetBufReSize(const size_t size)
 	return *this;
 }
 
+CBinaryString& CBinaryString::SetBufReSizeW(const size_t wsize)
+{
+	CBinaryStringCore* pTmp = new CBinaryStringCore(wsize*sizeof(wchar_t));
+	memcpy_s(pTmp->m_pData, wsize*sizeof(wchar_t), m_pBDA->m_pData, __min(wsize*sizeof(wchar_t), m_pBDA->m_BufSize));
+	pTmp->m_DataSize = __min(wsize*sizeof(wchar_t), m_pBDA->m_DataSize);
+	((wchar_t*)pTmp->m_pData)[pTmp->m_DataSize / sizeof(wchar_t)] = L'\0';
+	m_pBDA->Release();
+	m_pBDA = pTmp;
+	return *this;
+}
 
-size_t CBinaryString::GetBufSize()const noexcept
+CBinaryString& CBinaryString::Discard()
+{
+	SetBufReSize();
+	Clear();
+	return *this;
+}
+
+
+unsigned int CBinaryString::GetBufSize()const noexcept
 {
 	return m_pBDA->m_BufSize;
 }
 
-
-CBinaryString& CBinaryString::SetDataSize(const size_t size)
+unsigned int CBinaryString::GetBufSizeW() const noexcept
 {
-	m_pBDA->m_DataSize=size;
+	return m_pBDA->m_BufSize/sizeof(wchar_t);
+}
+
+
+CBinaryString& CBinaryString::SetDataSize(const unsigned int size)
+{
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
+	if (m_pBDA->m_BufSize < size)
+	{
+		SetBufReSize(size);
+	}
+	m_pBDA->m_DataSize = size;
+
 	m_pBDA->m_pData[size] = '\0';
 	return *this;
 }
 
-size_t CBinaryString::GetDataSize()const noexcept
+CBinaryString& CBinaryString::SetDataSizeW(const unsigned int wsize)
+{
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach(*this);
+	}
+	if (m_pBDA->m_BufSize < wsize * sizeof(wchar_t))
+	{
+		SetBufReSizeW(wsize * sizeof(wchar_t));
+	}
+	m_pBDA->m_DataSize = wsize*sizeof(wchar_t);
+	((wchar_t *)m_pBDA->m_pData)[wsize] = L'\0';
+	return *this;
+}
+
+unsigned int CBinaryString::GetDataSize()const noexcept
 {
 	return m_pBDA->m_DataSize;
+}
+
+unsigned int CBinaryString::GetDataSizeW() const noexcept
+{
+	return m_pBDA->m_DataSize/sizeof(wchar_t);
 }
 
 char8_t*  CBinaryString::GetBuffer8()const noexcept
 {
 	return m_pBDA->m_pData;
+}
+
+wchar_t* CBinaryString::GetBufferW() const noexcept
+{
+	return (wchar_t*)m_pBDA->m_pData;
 }
 
 char* CBinaryString::GetBufferA() const noexcept
@@ -359,13 +473,34 @@ char* CBinaryString::GetBufferA() const noexcept
 
 CBinaryString& CBinaryString::Detach(const CBinaryString& OtherCByteData)
 {
-	this->SetBinaryString8(OtherCByteData.c_str8(), OtherCByteData.GetDataSize());
-	this->SetBufReSize(OtherCByteData.GetBufSize());
-	return *this;
+	CBinaryStringCore* ptempBSC = new CBinaryStringCore(OtherCByteData.m_pBDA->m_BufSize);
+	memcpy(ptempBSC->m_pData, OtherCByteData.m_pBDA->m_pData, OtherCByteData.m_pBDA->m_DataSize);
+	ptempBSC->m_DataSize = OtherCByteData.m_pBDA->m_DataSize;
+	m_pBDA->Release();
+	m_pBDA = ptempBSC;
+	return  *this;
+}
+
+CBinaryString& CBinaryString::Detach()
+{
+	if (m_pBDA->m_RefCount == 1)
+	{
+		return *this;
+	}
+	CBinaryStringCore* ptempBSC = new CBinaryStringCore(m_pBDA->m_BufSize);
+	memcpy(ptempBSC->m_pData, m_pBDA->m_pData, m_pBDA->m_DataSize);
+	ptempBSC->m_DataSize = m_pBDA->m_DataSize;
+	m_pBDA->Release();
+	m_pBDA = ptempBSC;
+	return  *this;
 }
 
 CBinaryString CBinaryString::BinaryDataToSpaceHexTextA()
 {
+	if (m_pBDA->m_RefCount == 1)
+	{
+		Detach();
+	}
 	size_t SourceLen = m_pBDA->m_DataSize ;
 	size_t BufSize = m_pBDA->m_BufSize * 3 + 1;
 	char8_t *pstrSource = m_pBDA->m_pData;
@@ -386,19 +521,59 @@ CBinaryString CBinaryString::BinaryDataToSpaceHexTextA()
 		i++;
 	} while (i < SourceLen );
 	pstrDest[TotalLen - 1] = '\0';
-	pBDAtom->SetDataSize(TotalLen - 1);
+	pBDAtom->m_DataSize=TotalLen - 1;
 	m_pBDA->Release();
 	m_pBDA = pBDAtom;
 	return *this;
 }
 
+CBinaryString CBinaryString::BinaryDataToSpaceHexTextW()
+{
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
+	size_t numbSourceLen = m_pBDA->m_DataSize;
+//	size_t numwSourceLen = m_pBDA->m_DataSize/2;
+	size_t numbBufSize = (numbSourceLen * 2 )*sizeof(wchar_t);
+	if (m_pBDA->m_BufSize > numbBufSize)
+	{
+		numbBufSize = m_pBDA->m_BufSize;
+	}
+	char * pSourceData = (char*)m_pBDA->m_pData;
+	CBinaryStringCore* ptempBD = new CBinaryStringCore(numbBufSize);
+	wchar_t* pwstrDest = (wchar_t*)ptempBD->m_pData;
+	char str[12]{};
+	size_t numwTotal = 0;
+	size_t wLenWriten = 0;
+	unsigned int i = 0;
+	do {
+
+		wLenWriten = swprintf_s((wchar_t*)str, 6, L"%02X", pSourceData[i]);
+		wmemcpy(pwstrDest + numwTotal, (wchar_t*)str, wLenWriten);
+		numwTotal += wLenWriten;
+		pwstrDest[numwTotal] = L' ';
+		numwTotal +=1;
+		i++;
+	} while (i < numbSourceLen);
+	pwstrDest[numwTotal - 1] = L'\0';
+	ptempBD->m_DataSize = (numwTotal - 1)*sizeof(wchar_t);
+	m_pBDA->Release();
+	m_pBDA = ptempBD;
+	return *this;
+}
+
 CBinaryString CBinaryString::SpaceHexTextToBinaryDataA()
 {
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
 	using namespace std;
 	vector<string> Parts = Split(string(c_strA()), string(" "));
 	string str;
 	int i = 0;
-	char* pcData=new char[m_pBDA->m_DataSize]{};
+	char* pcData=new char[m_pBDA->m_DataSize+1]{};
 	while (!Parts.empty())
 	{
 		str = Parts.front();
@@ -406,14 +581,49 @@ CBinaryString CBinaryString::SpaceHexTextToBinaryDataA()
 		i++;
 		Parts.erase(Parts.begin());
 	}
-	memcpy(m_pBDA->m_pData, pcData, i + 1);
-	m_pBDA->SetDataSize(i);
+	memcpy(m_pBDA->m_pData, pcData, i + 2);
+	m_pBDA->m_DataSize=i;
 	delete [] pcData;
+	return *this;
+}
+
+CBinaryString CBinaryString::SpaceHexTextToBinaryDataW()
+{
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
+	using namespace std;
+	vector<wstring> Parts = SplitW(wstring(c_strw()), wstring(L" "));
+	wstring str;
+	int i = 0;
+	char* pcData = new char[(m_pBDA->m_DataSize + 3)*sizeof(wchar_t)]{};
+	while (!Parts.empty())
+	{
+		str = Parts.front();
+		pcData[i] = wcstoul(str.c_str(), NULL, 16);
+		i++;
+		Parts.erase(Parts.begin());
+	}
+	memcpy(m_pBDA->m_pData, pcData, i+3 );
+	m_pBDA->m_DataSize = i;
+	delete[] pcData;
+	return *this;
+}
+
+CBinaryString CBinaryString::HexTextToBinaryDataA()
+{
+	InsertSpaceHexTextA();
+	SpaceHexTextToBinaryDataA();
 	return *this;
 }
 
 CBinaryString CBinaryString::TrimFirstCodeA(char demilita)
 {
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
 	CBinaryString tmpBD(GetBufSize());
 	if (GetDataSize() == 0)
 	{
@@ -443,12 +653,17 @@ CBinaryString CBinaryString::TrimFirstCodeA(char demilita)
 	tmpBD.SetDataSize(count);
 	count++;
 
-	SetBinaryString8(c_str8() + count , datasize - count );
+	SetBinaryString8(m_pBDA->m_pData + count , datasize - count );
 	return tmpBD;
 }
 
 CBinaryString CBinaryString::TrimFirstCodesA(const char* strdemilita)
 {
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
+
 	CBinaryString rVal;
 	CBinaryString dem(strdemilita);
 	size_t demlen = dem.GetDataSize();
@@ -463,6 +678,11 @@ CBinaryString CBinaryString::TrimFirstCodesA(const char* strdemilita)
 
 CBinaryString CBinaryString::TrimFirstBFormat()
 {
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
+
 	CBinaryString strBF = this->TrimFirstCodeA(' ');
 	CBinaryString strLen = this->TrimFirstCodeA(' ');
 	size_t sizeLen = atol(strLen.c_strA());
@@ -475,6 +695,11 @@ CBinaryString CBinaryString::TrimFirstBFormat()
 
 CBinaryString CBinaryString::TrimPosition(unsigned long begin, unsigned long end)
 {
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
+
 	CBinaryString tmpBD(GetBufSize());
 	if (!(end <= GetDataSize()) || !(begin<=end))
 	{
@@ -573,7 +798,11 @@ int CBinaryString::FindLastA(const char* strFnd, unsigned int InitPos)const
 
 CBinaryString CBinaryString::MakeBFormat(emBFormat bFormat)
 {
-	CBinaryString bstr(1024);
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
+	CBinaryString bstr(DefAlloc);
 	CBinaryString thistmp(*this);
 	char strLen[64]{};
 	unsigned long len{0};
@@ -587,7 +816,7 @@ CBinaryString CBinaryString::MakeBFormat(emBFormat bFormat)
 	if (bFormat == emBFormat::HTS)
 	{
 		thistmp.BinaryDataToSpaceHexTextA();
-		thistmp.RemoveSpaceHexText();
+		thistmp.RemoveSpaceHexTextA();
 		len = thistmp.GetDataSize();
 		_ultoa_s(len, strLen, 64, 10);
 		bstr = "HTS " + CBinaryString(strLen) + " " + thistmp;
@@ -598,6 +827,11 @@ CBinaryString CBinaryString::MakeBFormat(emBFormat bFormat)
 
 CBinaryString CBinaryString::UnMakeBFormat()
 {
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
+
 	CBinaryString tmp = *this;
 	CBinaryString strFormat = tmp.TrimFirstCodeA(' ');
 	CBinaryString strLen = tmp.TrimFirstCodeA(' ');
@@ -609,7 +843,7 @@ CBinaryString CBinaryString::UnMakeBFormat()
 	}
 	else if (strFormat == "HTS")
 	{
-		tmpData.InsertSpaceHexText();
+		tmpData.InsertSpaceHexTextA();
 		tmpData.SpaceHexTextToBinaryDataA();
 		(*this)(tmpData);
 	}
@@ -625,6 +859,16 @@ bool CBinaryString::empty()const noexcept
 	return (m_pBDA->m_DataSize == 0) ? true:false;
 }
 
+void CBinaryString::SetDebugMark(const char* pstr,int size)
+{
+	if (m_pBDA->m_RefCount > 1)
+	{
+		Detach();
+	}
+	int maxsize = __max(8, size);
+	memcpy(m_pBDA->m_pDebugMark, pstr,maxsize);
+}
+
 CBinaryString operator+(const CBinaryString obj1,const CBinaryString obj2)
 {
 	size_t obj1Size = obj1.GetDataSize();
@@ -634,8 +878,8 @@ CBinaryString operator+(const CBinaryString obj1,const CBinaryString obj2)
 	char8_t *pStrTmp = tmp.GetBuffer8();
 	memcpy(pStrTmp, obj1.GetBuffer8(),obj1Size );
 	memcpy(pStrTmp + obj1Size, obj2.GetBuffer8(), obj2Size);
-
-	return CBinaryString(pStrTmp,TotalSize);
+	tmp.SetDataSize(TotalSize);
+	return CBinaryString(tmp);
 }
 
 CBinaryString operator+(const char* str1, const CBinaryString str2)

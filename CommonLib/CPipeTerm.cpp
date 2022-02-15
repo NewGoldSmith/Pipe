@@ -1,15 +1,44 @@
+//Copyright (c) 2021, Gold Smith
+//Released under the MIT license
+//https ://opensource.org/licenses/mit-license.php
+
 #include "CPipeTerm.h"
 #include <strsafe.h>
 #include <signal.h>
 #include <iostream>
 using namespace std;
 
-
-
-
-CPipeTerm::CPipeTerm():CBStream()
-,m_PipeOut{nullptr}
+CPipeTerm::stThreadParam::stThreadParam()
+	: hPipeIn(nullptr)
+	, bForcedTermination(false)
+	, pBD( nullptr)
+	, ReadQue()
+	, PoolQue()
+	, MtxRead{ 1 }
+	, MtxPool{ 1 }
+	, MtxEvent{ 1 }
+	, pThisThread(nullptr)
+	, len( 0 )
+	, pIsConnect(nullptr)
+	, ppEvOnDisconnect(nullptr)
 {
+}
+
+CPipeTerm::CPipeTerm(unsigned int NumCont, unsigned int ContSize)
+	:CBStream()
+	, m_ThreadParam()
+	, m_PipeOut(nullptr)
+{
+	m_NumInCont = NumCont;
+	if (NumCont < 1)
+	{
+		m_NumInCont = 1;
+	}
+	m_SizeInCont = ContSize;
+	if (ContSize<14)
+	{
+		m_SizeInCont = 14;
+	}
 	m_ThreadParam.ppEvOnDisconnect = &(this->m_pEvOnDisconnect);
 }
 
@@ -17,12 +46,12 @@ CPipeTerm::~CPipeTerm()
 {
 	if (m_ThreadParam.pThisThread != nullptr)
 	{
-		FinPipeWork();
+		Disconnect();
 	}
 }
 
 
-bool CPipeTerm::InitPipeWork(HANDLE hPipeIn, HANDLE hPipeOut)
+bool CPipeTerm::Connect()
 {
 	m_ThreadParam.bForcedTermination=false;
 	m_ThreadParam.MtxPool.acquire();
@@ -41,38 +70,47 @@ bool CPipeTerm::InitPipeWork(HANDLE hPipeIn, HANDLE hPipeOut)
 		delete pBD;
 	}
 	m_ThreadParam.MtxRead.release();
-	//	m_ThreadParam.bEndFlag = false;
-	m_PipeOut = hPipeOut;
-	m_ThreadParam.hPipe = hPipeIn;
+
 	m_ThreadParam.pIsConnect = &m_bConnected;
-	for (int i = 0; i <= 2; i++)
+	for (unsigned int i = 0; i <= m_NumInCont; i++)
 	{
-		m_ThreadParam.PoolQue.push(new CBinaryString(1024));
+		CBinaryString * pBstr=(CBinaryString *) new CBinaryString(m_SizeInCont);
+		m_ThreadParam.PoolQue.push(pBstr);
+		m_StringPointerWarehouse.push_back(pBstr);
 	}
 	m_bConnected = true;
-	//コンソール入出力待ちスレッド起動
+
 	m_ThreadParam.pThisThread = new std::thread(&PipeThread, &m_ThreadParam);
 	return true;
 }
 
-bool CPipeTerm::FinPipeWork()
+
+void CPipeTerm::SetHandle(HANDLE hPipeIn, HANDLE hPipeOut)
 {
-	//パイプ入力待ちのスレッドを終了。
+	m_ThreadParam.hPipeIn = hPipeIn;
+	m_PipeOut = hPipeOut;
+}
+
+bool CPipeTerm::Disconnect()
+{
+	if (m_ThreadParam.pThisThread == nullptr)
+	{
+		return true;
+	}
+
 	m_ThreadParam.bForcedTermination = true;
 	HANDLE hThread=m_ThreadParam.pThisThread->native_handle();
 	int rVal = CancelSynchronousIo(hThread);
-	//スレッドが終了するまで待ち。
+
 	m_ThreadParam.pThisThread->join();
 	delete m_ThreadParam.pThisThread;
 	m_ThreadParam.pThisThread = nullptr;
 
-	//キューの中身を削除
 	m_ThreadParam.MtxPool.acquire();
 	while (!m_ThreadParam.PoolQue.empty())
 	{
 		CBinaryString* pBD = m_ThreadParam.PoolQue.front();
 		m_ThreadParam.PoolQue.pop();
-		delete pBD;
 	}
 	m_ThreadParam.MtxPool.release();
 	m_ThreadParam.MtxRead.acquire();
@@ -80,10 +118,18 @@ bool CPipeTerm::FinPipeWork()
 	{
 		CBinaryString*pBD = m_ThreadParam.ReadQue.front();
 		m_ThreadParam.ReadQue.pop();
-		delete pBD;
 	}
 	m_ThreadParam.MtxRead.release();
+
 	m_bConnected = false;
+
+	for (int i = m_StringPointerWarehouse.size(); 0 < i; --i)
+	{
+		CBinaryString* pBS;
+		pBS = m_StringPointerWarehouse.front();
+		delete pBS;
+		m_StringPointerWarehouse.erase(m_StringPointerWarehouse.begin());
+	}
 	return true;
 }
 
@@ -111,23 +157,45 @@ void CPipeTerm::PipeThread(stThreadParam* pParam)
 		if (pParam->PoolQue.empty())
 		{
 			pParam->MtxPool.release();
-			break;
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue;
 		}
 		pParam->pBD = pParam->PoolQue.front();
 		pParam->PoolQue.pop();
 		pParam->MtxPool.release();
-		pParam->len = _read(_open_osfhandle((intptr_t)pParam->hPipe, _O_RDONLY), pParam->pBD->GetBuffer8(), pParam->pBD->GetBufSize());
+
+		pParam->len = HRead(pParam->hPipeIn,*pParam->pBD);
 		if (pParam->len != -1)
 		{
-			pParam->pBD->SetDataSize(pParam->len);
+			if (pParam->len != 0)
+			{
+				pParam->pBD->SetDataSize(pParam->len);
+				pParam->MtxRead.acquire();
+				pParam->ReadQue.push(pParam->pBD);
+				pParam->pBD = nullptr;
+				pParam->MtxRead.release();
+			}
+			else {
+				pParam->bForcedTermination = true;
+				pParam->MtxPool.acquire();
+				pParam->PoolQue.push(pParam->pBD);
+				pParam->pBD = nullptr;
+				pParam->MtxPool.release();
+				break;
+			}
+		}
+		else {
+			pParam->bForcedTermination = true;
+			pParam->MtxPool.acquire();
+			pParam->PoolQue.push(pParam->pBD);
+			pParam->pBD = nullptr;
+			pParam->MtxPool.release();
+			break;
 		}
 
-		pParam->MtxRead.acquire();
-		pParam->ReadQue.push(pParam->pBD);
-		pParam->MtxRead.release();
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+//		std::this_thread::sleep_for(std::chrono::milliseconds(0));
 	}
-	//終了処理
+
 	_flushall();
 	*pParam->pIsConnect = false;
 	pParam->MtxEvent.acquire();
@@ -140,34 +208,48 @@ void CPipeTerm::PipeThread(stThreadParam* pParam)
 
 int CPipeTerm::Read(CBinaryString& outBD)
 {
-	outBD.SetDataSize(0);
+	CBinaryString* pStr(nullptr);
 	m_ThreadParam.MtxRead.acquire();
+
+	if (CBStream::Read(outBD))
+	{
+		m_ThreadParam.MtxRead.release();
+		return -1;
+	}
+
 	if (m_ThreadParam.ReadQue.empty())
 	{
 		m_ThreadParam.MtxRead.release();
+		return 0;
 	}
-	else 
+
+	while (!m_ThreadParam.ReadQue.empty())
 	{
-		CBinaryString* pBD;
-		while (!m_ThreadParam.ReadQue.empty())
-		{
-			pBD = m_ThreadParam.ReadQue.front();
-			
-			outBD += *pBD;
-			m_ThreadParam.ReadQue.pop();
+		pStr = m_ThreadParam.ReadQue.front();
 
-			m_ThreadParam.MtxPool.acquire();
-			m_ThreadParam.PoolQue.push(pBD);
-			m_ThreadParam.MtxPool.release();
-		}
-		m_ThreadParam.MtxRead.release();
+		outBD += *pStr;
+		*pStr = "";
+		m_ThreadParam.ReadQue.pop();
 
+		m_ThreadParam.MtxPool.acquire();
+		m_ThreadParam.PoolQue.push(pStr);
+		pStr = nullptr;
+		m_ThreadParam.MtxPool.release();
 	}
+
+	m_ThreadParam.MtxRead.release();
 	return outBD.GetDataSize();
 }
 
 int CPipeTerm::Write(const CBinaryString& BD)
 {
-	return PipeHelper::HWrite(m_PipeOut,BD);
+	if (CBStream::Write(BD))
+	{
+		return -1;
+	}
+
+	int res= PipeHelper::HWrite(m_PipeOut,BD);
+	FlushFileBuffers(m_PipeOut);
+	return res;
 }
 

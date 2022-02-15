@@ -1,15 +1,12 @@
 #include "CBSSocket.h"
 
 CBSSocket::CBSSocket():CBStream()
+	,m_Socket(0)
+	,m_Err(0)
+	,m_fOpSuccess(false)
+	,m_TimeOut(false)
 {
 	using namespace SocketHelper;
-	// Initialize Winsock
-	m_pSocket = 0;
-	bool bContinue = true;
-	m_Err = 0;
-	m_fOpSuccess = false;
-	m_TimeOut = false;
-	m_bConnected = false;
 }
 
 CBSSocket::~CBSSocket()
@@ -18,10 +15,11 @@ CBSSocket::~CBSSocket()
 
 bool CBSSocket::Create()
 {
-	m_pSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_pSocket == INVALID_SOCKET)
+	m_Socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (m_Socket == INVALID_SOCKET)
 	{
 		m_Err = GetLastError();
+		m_Socket = 0;
 		return false;
 	}
 	return true;
@@ -47,7 +45,7 @@ bool CBSSocket::Bind(std::string strHostAddr, UINT uiHostPort)
 			m_fOpSuccess = false;
 		}
 	}
-	m_Err = bind(m_pSocket, (struct sockaddr*)&(addr), sizeof(addr));
+	m_Err = bind(m_Socket, (struct sockaddr*)&(addr), sizeof(addr));
 	if (m_Err == SOCKET_ERROR)
 	{
 		return false;
@@ -75,7 +73,7 @@ bool CBSSocket::Connect( std::string strPeerAddress, USHORT uPeerPort,long lTime
 			return false;
 		}
 	}
-	m_Err = ::connect(m_pSocket, (struct sockaddr*)&(addr), sizeof(addr));
+	m_Err = ::connect(m_Socket, (struct sockaddr*)&(addr), sizeof(addr));
 	if (m_Err == SOCKET_ERROR)
 	{
 		bool result = false;
@@ -105,7 +103,7 @@ bool CBSSocket::Connect( std::string strPeerAddress, USHORT uPeerPort,long lTime
 	}
 	//ノンブロックに変更
 	u_long flag = 1;
-	m_Err = ::ioctlsocket(m_pSocket, FIONBIO, &flag);
+	m_Err = ::ioctlsocket(m_Socket, FIONBIO, &flag);
 	if (m_Err == SOCKET_ERROR)
 	{
 		return false;
@@ -121,17 +119,17 @@ void CBSSocket::DisConnect()
 
 	//ブロックに変更
 	u_long flag = 0;
-	m_Err = ::ioctlsocket(m_pSocket, FIONBIO, &flag);
+	m_Err = ::ioctlsocket(m_Socket, FIONBIO, &flag);
 	if (m_Err == SOCKET_ERROR)
 	{
-		return;
+		;
 	}
-	m_Err = ::shutdown(m_pSocket, SD_BOTH);
+	m_Err = ::shutdown(m_Socket, SD_BOTH);
 	if (m_Err == SOCKET_ERROR)
 	{
-		return ;
+		 ;
 	}
-	m_Err = ::closesocket(m_pSocket);
+	m_Err = ::closesocket(m_Socket);
 	if (m_Err == SOCKET_ERROR)
 	{
 		m_Err = GetLastError();
@@ -147,33 +145,96 @@ void CBSSocket::DisConnect()
 			break;
 		}
 	}
-	m_pSocket = 0;
+	m_Socket = 0;
 	return;
+}
+
+int CBSSocket::Listen(int backlog)
+{
+	//ノンブロックに変更
+	u_long flag = 1;
+	m_Err = ioctlsocket(m_Socket, FIONBIO, &flag);
+	if (m_Err == SOCKET_ERROR)
+	{
+		closesocket(m_Socket);
+		m_Socket = 0;
+		m_bConnected = false;
+		return false;
+	}
+
+	if (listen(m_Socket, backlog) == SOCKET_ERROR)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool CBSSocket::Accept(CBSSocket* pConnectionSocket)
+{
+	if (pConnectionSocket->m_Socket != 0)
+	{
+		return false;
+	}
+	//アクセプト
+	sockaddr  SevSocAddr;
+	int Len = sizeof(sockaddr);
+	pConnectionSocket->m_Socket = accept(m_Socket, &(SevSocAddr), &Len);
+	if (pConnectionSocket->m_Socket == INVALID_SOCKET)
+	{
+		m_Err = GetLastError();
+		switch (m_Err)
+		{
+		case WSAEWOULDBLOCK:
+			break;
+		default:
+			pConnectionSocket->m_Socket = 0;
+			return false;
+		}
+	}
+	pConnectionSocket->m_bConnected = true;
+	//ノンブロックに変更
+	u_long flag = 1;
+	m_Err = ioctlsocket(pConnectionSocket->m_Socket, FIONBIO, &flag);
+	if (m_Err == SOCKET_ERROR)
+	{
+		closesocket(pConnectionSocket->m_Socket);
+		pConnectionSocket->m_Socket = 0;
+		pConnectionSocket->m_bConnected = false;
+		return false;
+	}
+	return true;
 }
 
 int CBSSocket::Read(CBinaryString& BD)
 {
-	int Err;
-	int len = SocketHelper::SockRead(m_pSocket, &BD);
+	int len = SocketHelper::SockRead(m_Socket, &BD);
 	if (len == 0)
 	{
-		m_bConnected=false;
+		m_bConnected = false;
+		closesocket(m_Socket);
+		m_Socket = 0;
 		if (m_pEvOnDisconnect != nullptr)
 		{
 			(m_pEvOnDisconnect)();
 		}
 	}
-	else if (len== SOCKET_ERROR)
+	else if (len == SOCKET_ERROR)
 	{
-		Err = GetLastError();
-		switch (Err)
+		m_Err = GetLastError();
+		switch (m_Err)
 		{
 		case WSAEWOULDBLOCK:
 			break;
 		case WSAENOTSOCK:
 			break;
 		default:
-			break;
+			m_bConnected = false;
+			closesocket(m_Socket);
+			m_Socket = 0;
+			if (m_pEvOnDisconnect != nullptr)
+			{
+				(m_pEvOnDisconnect)();
+			}
 		}
 	}
 	return len;
@@ -181,17 +242,18 @@ int CBSSocket::Read(CBinaryString& BD)
 
 int CBSSocket::Write(const CBinaryString& BD)
 {
-	int Err = 0;
-	int len = SocketHelper::SockWrite(m_pSocket, &BD);
+	int len = SocketHelper::SockWrite(m_Socket, &BD);
 	if (len == SOCKET_ERROR)
 	{
-		Err = GetLastError();
-		switch (Err)
+		m_Err = GetLastError();
+		switch (m_Err)
 		{
 		case WSAEWOULDBLOCK:
 			break;
 		default:
 			m_bConnected = false;
+			closesocket(m_Socket);
+			m_Socket = 0;
 			if (m_pEvOnDisconnect != nullptr)
 			{
 				(m_pEvOnDisconnect)();
@@ -236,10 +298,10 @@ bool CBSSocket::Wait(long ltimeout)
 	int Err = 0;
 	fd_set rmask = {}, wmask = {};
 	FD_ZERO(&rmask);
-	FD_SET(m_pSocket, &rmask); 
+	FD_SET(m_Socket, &rmask); 
 	wmask = rmask;
 	struct timeval tv = { ltimeout,0 };
-	int rc = select((int)m_pSocket + 1, &rmask, &wmask, NULL, &tv);
+	int rc = select((int)m_Socket + 1, &rmask, &wmask, NULL, &tv);
 	if (rc == SOCKET_ERROR)
 	{
 		Err = WSAGetLastError();
@@ -254,7 +316,7 @@ bool CBSSocket::Wait(long ltimeout)
 	{ //読み書きが同時に出来る場合
 		int val;
 		int len = sizeof(val);
-		if (getsockopt(m_pSocket, SOL_SOCKET, SO_ERROR, (char*)&val, &len) != 0)
+		if (getsockopt(m_Socket, SOL_SOCKET, SO_ERROR, (char*)&val, &len) != 0)
 		{
 			// 既にデータが来ている
 			return true;

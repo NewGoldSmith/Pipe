@@ -1,29 +1,38 @@
 #pragma once
 #include <string.h>
 #include <CBinaryString.h>
+//#include <CBWinConv.h>
+//#include <CBWinConv.h>
 class CBinaryString;
+
 class CBinaryStringCore
 {
-private:
-	CBinaryStringCore& operator = (CBinaryStringCore&& obj)  noexcept = default;
-protected:
 	friend class CBinaryString;
+protected:
+
 	virtual ~CBinaryStringCore();
-	CBinaryStringCore(CBinaryStringCore& other);
+	CBinaryStringCore(const CBinaryStringCore& other) = delete;
+	CBinaryStringCore(const CBinaryStringCore&& other) = delete;
+	CBinaryStringCore& operator=(const CBinaryStringCore& otherobj) = delete;
+	CBinaryStringCore& operator = (const CBinaryStringCore&& obj) = delete;
+	CBinaryStringCore& operator()(const CBinaryStringCore& otherobj) = delete;
+	CBinaryStringCore& operator()(const CBinaryStringCore&& otherobj) = delete;
 
 public:
-	CBinaryStringCore(size_t len);
-	unsigned long AddRef() noexcept;
-	unsigned long  Release();
+	CBinaryStringCore() = delete;
+	CBinaryStringCore(unsigned int len);
+	unsigned int AddRef() noexcept;
+	unsigned int  Release();
 
 protected:
 	char8_t* m_pData;
-	unsigned long m_RefCount;
-	size_t m_DataSize;
-	size_t m_BufSize;
-	size_t SetDataSize(size_t len);
-	size_t GetDataSize();
-	size_t GetBufSize();
-	size_t SetBufSize(size_t len);
+	char8_t* m_pDebugMark;
+	unsigned int m_RefCount;
+	unsigned int m_DataSize;
+	unsigned int m_BufSize;
+//	unsigned int SetDataSize(unsigned int len);
+//	unsigned int GetDataSize();
+//	unsigned int GetBufSize();
+//	unsigned int SetBufSize(unsigned int len);
 
 };

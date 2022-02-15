@@ -2,8 +2,10 @@
 
 int PipeHelper::StdRead(CBinaryString&bd)
 {
-	int len =_read(_fileno(stdin),bd.GetBuffer8(), bd.GetBufSize());
+	CBinaryString bstr(bd.GetBufSize());
+	int len =_read(_fileno(stdin), bstr.GetBuffer8(), bstr.GetBufSize());
 	bd.SetDataSize(len);
+	bd = bstr;
 	return len;
 }
 
@@ -13,21 +15,47 @@ int PipeHelper::StdWrite(const CBinaryString& bd)
 	return len;
 }
 
-int PipeHelper::HRead(HANDLE hPipeIn, CBinaryString&bd)
+int PipeHelper::HRead(HANDLE hPipeIn, CBinaryString& bd)
 {
-	int len = _read(_open_osfhandle((intptr_t)hPipeIn, _O_RDONLY), bd.GetBuffer8(), bd.GetBufSize());
-	if (len == -1)
+	DWORD dwNumberOfBytesRead;
+	bd.Clear();
+	BOOL rVal = ReadFile(hPipeIn, bd.GetBuffer8(), bd.GetBufSize(), &dwNumberOfBytesRead, NULL);
+	if (rVal)
 	{
-		bd.SetDataSize(0);
+		bd.SetDataSize(dwNumberOfBytesRead);
 	}
 	else {
-		bd.SetDataSize(len);
+		bd.SetDataSize(0);
+		DWORD code = GetLastError();
+		switch (code)
+		{
+		case ERROR_IO_PENDING:
+			return 0;
+		default:
+			break;
+			return -1;
+		}
 	}
-	return len;
+	return dwNumberOfBytesRead;
 }
 
-int PipeHelper::HWrite(HANDLE hPipeOut,const CBinaryString&bd)
+int PipeHelper::HWrite(HANDLE hPipeOut, const CBinaryString& bd)
 {
-	int len = _write(_open_osfhandle((intptr_t)hPipeOut,  0), bd.c_strA(), bd.GetDataSize());
-	return len;
+	DWORD dwWriten;
+	BOOL rVal = WriteFile(hPipeOut,bd.GetBuffer8(), bd.GetDataSize(),&dwWriten,NULL);
+	if (rVal)
+	{
+		return dwWriten;
+	}
+	else {
+		DWORD code = GetLastError();
+		switch (code)
+		{
+		case ERROR_IO_PENDING:
+			return 0;
+		default:
+			break;
+			return -1;
+		}
+	}
 }

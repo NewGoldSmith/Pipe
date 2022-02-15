@@ -1,28 +1,16 @@
 #include "CBinaryStringCore.h"
 
 
-
-CBinaryStringCore::CBinaryStringCore(CBinaryStringCore& other):
-m_pData(nullptr)
-, m_RefCount(0)
-, m_DataSize(0)
-, m_BufSize(0)
-{
-	m_pData = new char8_t[other.m_BufSize + 1];
-	memcpy(m_pData, other.m_pData, other.m_BufSize + 1);
-	m_RefCount = 1;
-	m_BufSize = other.m_BufSize;
-	m_DataSize = other.m_DataSize;
-}
-
-CBinaryStringCore::CBinaryStringCore(size_t len):
+CBinaryStringCore::CBinaryStringCore(unsigned int len):
 	m_pData(nullptr)
 	,m_RefCount(0)
 	,m_DataSize(0)
 	,m_BufSize(0)
+	,m_pDebugMark(nullptr)
 {
-	m_pData = (char8_t*) new char8_t[len+1];
-	memset(m_pData, 0, len + 1);
+	m_pDebugMark = (char8_t*) new char8_t[len + 2+8];
+	memset(m_pDebugMark, 0, len + 2+8);
+	m_pData = m_pDebugMark + 8*sizeof(char8_t);
 	m_RefCount = 1;
 	m_BufSize = len;
 	m_DataSize = 0;
@@ -30,46 +18,17 @@ CBinaryStringCore::CBinaryStringCore(size_t len):
 
 CBinaryStringCore::~CBinaryStringCore()
 {
-	delete[] m_pData;
+	delete[] m_pDebugMark;
 }
 
-unsigned long CBinaryStringCore::AddRef() noexcept
+unsigned int CBinaryStringCore::AddRef() noexcept
 {
 	m_RefCount++;
 	return m_RefCount;
 }
 
 
-size_t CBinaryStringCore::SetDataSize(size_t len)
-{
-	size_t tmp=m_DataSize;
-	m_DataSize = len;
-	return tmp;
-}
-
-
-size_t CBinaryStringCore::GetDataSize()
-{
-	return m_DataSize;
-}
-
-
-size_t CBinaryStringCore::GetBufSize()
-{
-	return m_BufSize;
-}
-
-
-size_t CBinaryStringCore::SetBufSize(size_t len)
-{
-	size_t tmp = m_BufSize;
-	m_BufSize = len;
-	return tmp;
-}
-
-
-
-unsigned long CBinaryStringCore::Release()
+unsigned int CBinaryStringCore::Release()
 {
 	m_RefCount--;
 	if (m_RefCount == 0)
