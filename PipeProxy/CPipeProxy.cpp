@@ -92,7 +92,8 @@ bool CPipeProxy::OnLowEXEC(const CBinaryString& bstr)
 
 	CloseHandle(hChild_Down_Rd);
 	CloseHandle(hChild_Up_Wr);
-	m_PipeChild.InitPipeWork(m_hChildUpRd, m_hChildDownWr);
+	m_PipeChild.SetHandle(m_hChildUpRd, m_hChildDownWr);
+	m_PipeChild.Connect();
 	CBinaryString rep = "NOTE EXEC OK\r\n";
 	m_pBStream->Write(rep);
 	tmp.TrimFirstCodesA("\r\n");
@@ -151,7 +152,7 @@ bool CPipeProxy::OnLowSEND(const CBinaryString& bstr)
 void CPipeProxy::OnEvExeEnd()
 {
 	m_pBStream->Write("NOTE DISCONNECTED EXEC\r\n");
-	m_PipeChild.FinPipeWork();
+	m_PipeChild.Disconnect();
 	CloseHandle(m_hChildDownWr);
 	m_hChildDownWr = nullptr;
 	CloseHandle(m_hChildUpRd);
