@@ -1,0 +1,4 @@
+"\x1b[6n"
+"\x1b[1;1R\r\n"
+"\x1b[m\x1b]0;C:\\Windows\\SYSTEM32\\cmd.exe\a\x1b[?25hMicrosoft Windows [Version 10.0.19044.1466]    \r\n(c) Microsoft Corporation. All rights reserved.\r\n\x1b[47X\r\nG:\\test\\Pipe\\ByteDataTest>\x1b[21X"
+"admin\x1b[25l\x1b[29;3Hadministrator\x1b[K\r\x1b[?25h\nPassword:\r\nError: Incorrect password\r\n>\x1b[1C"

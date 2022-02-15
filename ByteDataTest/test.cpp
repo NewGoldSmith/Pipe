@@ -1,29 +1,31 @@
-//#define _CRT_SECURE_NO_WARNINGS
-//#include <stdio.h>
-//#include <string.h>
-//int TextToHexTextA(char* pstrDest, unsigned int szDest, char* pstrSource);
-//int main()
-//{
-//	char strSource[] { "A\r\n" };
-//	char strDest[256]{};
-//	int len = TextToHexTextA(strDest, 256, strSource);
-//}
-//int TextToHexTextA(char* pstrDest, unsigned int szDest, char* pstrSource)
-//{
-//	unsigned int SourceLen = strlen(pstrSource);
-//	char str[3]{};
-//	int TotalLen = 0;
-//	int LenWriten = 0;
-//	int i = 0;
-//	do {
-//
-//		LenWriten = sprintf_s(str, 3, "%02X", (unsigned char)pstrSource[i]);
-//		_memccpy(pstrDest + TotalLen, str, sizeof(char), LenWriten);
-//		TotalLen += LenWriten;
-//		pstrDest[TotalLen] = ' ';
-//		TotalLen++;
-//		i++;
-//	} while (i < SourceLen && (TotalLen + 3) < szDest);
-//	pstrDest[TotalLen - 1] = '\0';
-//	return TotalLen - 1;
-//}
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <string.h>
+#include <CBinaryString.h>
+#include <CBStreamQue.h>
+#include <CPConsole.h>
+#include <iostream>
+#include <string>
+#include <CBStreamTerm.h>
+#include <CBWinConv.h>
+
+using namespace std;
+using namespace CBWinConv;
+#include <CPConsole.h>
+int main()
+{
+	CBinaryString str;
+	str.SetTextStringW(L"cmd.exe");
+	CPConsole con;
+	con.SetCommand(str);
+	con.SetAccessMode(CPConsole::emAccessMode::Write);
+	con.SetStdAccessMode(CPConsole::emAccessMode::No);
+	con.SetInterceptMode(CPConsole::emInterceptMode::Cover);
+	con.Connect();
+	con.Write("ping localhost\r\n");
+
+	while (con.IsConnect())
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+}

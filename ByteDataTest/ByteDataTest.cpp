@@ -13,7 +13,8 @@
 #include <map>
 #include <vector>
 #include <CProtoNPCP11.h>
-#include <CJointStream.h>
+#include <CJointStream3.h>
+
 
     using namespace std;
 	void func(){};
@@ -21,9 +22,25 @@ int main()
 {
     CPipeTerm pipeStd;
     CPipeTerm pipeChild;
-    CJointStream JointStream;
+    CJointStream3 JointStream3;
     WinExeEngine engine;
 	SECURITY_ATTRIBUTES saAttr = {};
+	CBSSocket socConnect;
+	CBSSocket socListen;
+	CPConsole console;
+	HRESULT res;
+
+	WSADATA wsaData = { 0 };
+	int iResult = 0;
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (iResult != 0) {
+		wprintf(L"WSAStartup failed: %d\n", iResult);
+	}
+
+	bool rVal=socListen.Create();
+	rVal=socListen.Bind("127.0.0.3",50000);
+	rVal=socListen.Listen();
+	rVal= socListen.Accept(&socConnect);
 
 	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
 	saAttr.bInheritHandle = TRUE;
@@ -50,22 +67,26 @@ int main()
 	}
 	CloseHandle(hChild_Down_Rd);
 	CloseHandle(hChild_Up_Wr);
-	pipeStd.InitPipeWork(hStdIn, hStdOut);
-	pipeChild.InitPipeWork(hChild_Up_Rd, hChild_Down_Wr);
-	JointStream.SetStream(&pipeStd, &pipeChild);
-	JointStream.StartWork();
-	for (; engine.IsRun();)
+	pipeStd.Connect(hStdIn, hStdOut);
+	pipeChild.Connect(hChild_Up_Rd, hChild_Down_Wr);
+	JointStream3.SetStream3(&pipeStd, &pipeChild,&socConnect);
+	JointStream3.StartWork3();
+	for (; JointStream3.IsRunning();)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 	engine.ForcedTermination();
-	JointStream.StopWork();
+	JointStream3.StopWork3();
 	pipeStd.SetEventHandler(&func);
 	pipeStd.ClearEventHandler();
-	pipeStd.FinPipeWork();
-	pipeChild.FinPipeWork();
+	pipeStd.Disconnect();
+	pipeChild.Disconnect();
 	CloseHandle(hChild_Down_Wr);
 	CloseHandle(hChild_Up_Rd);
 
-    
+	socListen.DisConnect();
+	socConnect.DisConnect();
+
+	WSACleanup();
+
 }
