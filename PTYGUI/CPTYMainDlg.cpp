@@ -119,13 +119,11 @@ BEGIN_MESSAGE_MAP(CPTYMainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_P_HEXTEXT, &CPTYMainDlg::OnBnClickedButtonPHextext)
 	ON_BN_CLICKED(IDC_BUTTON_SDT_HEXTEXT, &CPTYMainDlg::OnBnClickedButtonSdtHextext)
 	ON_BN_CLICKED(IDC_BUTTON_P_CRLF, &CPTYMainDlg::OnBnClickedButtonPCrlf)
-	ON_BN_CLICKED(IDC_BUTTON_STD_ESC, &CPTYMainDlg::OnBnClickedButtonStdEsc)
-	ON_BN_CLICKED(IDC_BUTTON_VTFILE_CLOSE, &CPTYMainDlg::OnBnClickedButtonVtfileClose)
 	ON_EN_CHANGE(IDC_EDIT_VT_TIMER, &CPTYMainDlg::OnEnChangeEditVtTimer)
 	ON_EN_CHANGE(IDC_EDIT_N_BYTES_READ, &CPTYMainDlg::OnEnChangeEditNBytesRead)
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_CHECK_VT_REPEAT, &CPTYMainDlg::OnBnClickedCheckVtRepeat)
-	ON_BN_CLICKED(IDC_BUTTON_RESET, &CPTYMainDlg::OnBnClickedButtonReset)
+	ON_BN_CLICKED(IDC_BUTTON_STD_ESC, &CPTYMainDlg::OnBnClickedButtonStdEsc)
 END_MESSAGE_MAP()
 
 
@@ -450,7 +448,6 @@ void CPTYMainDlg::OnDestroy()
 
 void CPTYMainDlg::OnClickedButtonOpen()
 {
-	USES_CONVERSION;
 	if (m_Console.IsConnect())
 	{
 		return;
@@ -495,7 +492,7 @@ void CPTYMainDlg::OnClickedButtonClose()
 	{
 		m_Console.CloseConsole();
 	}
-
+	KillTimer(emTimer1);
 	FreeConsole();
 }
 
@@ -649,7 +646,17 @@ void CPTYMainDlg::OnBnClickedButtonVtfileOpen()
 		strPathName = fileDlg.GetPathName();
 		m_StaticVTFilePath.SetWindowText(strPathName);
 	}
-	OnBnClickedButtonReset();
+	if (m_VTReadNumByte.IsOpen() == true)
+	{
+		if (m_bIsVTRunning == true)
+		{
+			OnBnClickedButtonVtStop();
+			OnBnClickedButtonVtPlay();
+		}
+		else {
+			m_VTReadNumByte.Close();
+		}
+	}
 }
 
 
@@ -693,6 +700,9 @@ void CPTYMainDlg::OnBnClickedButtonVtStop()
 	KillTimer(emTimer1);
 	m_VTReadNumByte.Close();
 	m_bIsVTRunning = false;
+	CBinaryString bstr("\x1b");
+	bstr += "c";
+	m_Console.StdWrite(bstr);
 }
 
 
@@ -724,32 +734,12 @@ void CPTYMainDlg::OnBnClickedButtonPCrlf()
 }
 
 
-void CPTYMainDlg::OnBnClickedButtonStdEsc()
-{
-	CBinaryString str("1B");
-	str.HexTextToBinaryDataA();
-	m_Console.StdWrite(str);
-}
-
-
-void CPTYMainDlg::OnBnClickedButtonVtfileClose()
-{
-	m_VTReadNumByte.Close();
-	m_bIsVTRunning = false;
-	KillTimer(emTimer1);
-}
-
-
-void CPTYMainDlg::OnBnClickedButtonReset()
-{
-	KillTimer(emTimer1);
-	m_VTReadNumByte.Close();
-	m_bIsVTRunning = false;
-	CBinaryString bstr("\x1b");
-	bstr += "c";
-	m_Console.StdWrite(bstr);
-	OnBnClickedButtonVtPlay();
-}
+//void CPTYMainDlg::OnBnClickedButtonStdEsc()
+//{
+//	CBinaryString str("1B");
+//	str.HexTextToBinaryDataA();
+//	m_Console.StdWrite(str);
+//}
 
 
 void CPTYMainDlg::OnEnChangeEditVtTimer()
@@ -786,6 +776,8 @@ void CPTYMainDlg::OnTimer(UINT_PTR nIDEvent)
 		if (m_VTReadNumByte.IsEnd())
 		{
 			KillTimer(emTimer1);
+			m_VTReadNumByte.SetStartPos();
+			m_bIsVTRunning = false;
 		}
 		m_Console.StdWrite(bstr);
 		break;
@@ -804,7 +796,9 @@ void CPTYMainDlg::OnBnClickedCheckVtRepeat()
 
 
 
-//void CPTYMainDlg::OnBnClickedButtonReset()
-//{
-//	// TODO: ここにコントロール通知ハンドラー コードを追加します。
-//}
+void CPTYMainDlg::OnBnClickedButtonStdEsc()
+{
+		CBinaryString str("1B");
+		str.HexTextToBinaryDataA();
+		m_Console.StdWrite(str);
+}

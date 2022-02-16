@@ -40,12 +40,9 @@
 #define IDC_STATIC_VT_FILEPATH          1030
 #define IDC_BUTTON_P_CRLF               1031
 #define IDC_BUTTON_STD_ESC              1032
-#define IDC_BUTTON_VTFILE_CLOSE         1033
 #define IDC_CHECK_VT_REPEAT             1035
 #define IDC_EDIT_N_BYTES_READ           1036
 #define IDC_SPIN_N_BYTES_READ           1039
-#define IDC_BUTTON_TO_START_POS         1040
-#define IDC_BUTTON_RESET                1040
 #define IDC_EDIT_AA                     1042
 
 // Next default values for new objects

@@ -53,8 +53,6 @@ public:
 	afx_msg void OnClickedButtonOpen();
 protected:
 	CPConsole m_Console;
-//	CJointIntercept m_JointIntercept;
-//	BStreamQue m_StreamQue;
 public:
 	afx_msg void OnClickedButtonClose();
 protected:
@@ -108,9 +106,7 @@ public:
 	afx_msg void OnBnClickedButtonPHextext();
 	afx_msg void OnBnClickedButtonSdtHextext();
 	afx_msg void OnBnClickedButtonPCrlf();
-	afx_msg void OnBnClickedButtonStdEsc();
-	afx_msg void OnBnClickedButtonVtfileClose();
-	afx_msg void OnBnClickedButtonReset();
+//	afx_msg void OnBnClickedButtonStdEsc();
 protected:
 	CButton m_CheckVtRepeat;
 	CEdit m_EditNBytesRead;
@@ -126,7 +122,8 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedCheckVtRepeat();
 protected:
-	CStatic m_StaticBitmap;
 	CEdit m_EditAA;
 	CFont m_FontAA;
+public:
+	afx_msg void OnBnClickedButtonStdEsc();
 };
