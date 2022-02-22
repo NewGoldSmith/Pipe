@@ -106,7 +106,6 @@ public:
 	afx_msg void OnBnClickedButtonPHextext();
 	afx_msg void OnBnClickedButtonSdtHextext();
 	afx_msg void OnBnClickedButtonPCrlf();
-//	afx_msg void OnBnClickedButtonStdEsc();
 protected:
 	CButton m_CheckVtRepeat;
 	CEdit m_EditNBytesRead;

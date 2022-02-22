@@ -356,7 +356,7 @@ void CPTYMainDlg::LoadProfile()
 		m_Console.SetInterceptMode(CPConsole::emInterceptMode::Steal);
 
 	CString str;
-	str =pApp->GetProfileString(_T("DLGCTL_STATUS"), _T("VT_TIMER"), _T("100"));
+	str =pApp->GetProfileString(_T("DLGCTL_STATUS"), _T("VT_TIMER"), _T("1000"));
 	m_EditVtTimer.SetWindowTextW(str);
 
 	CBinaryString bstrw,utfstr;
@@ -732,14 +732,6 @@ void CPTYMainDlg::OnBnClickedButtonPCrlf()
 {
 	m_Console.Write("\r\n");
 }
-
-
-//void CPTYMainDlg::OnBnClickedButtonStdEsc()
-//{
-//	CBinaryString str("1B");
-//	str.HexTextToBinaryDataA();
-//	m_Console.StdWrite(str);
-//}
 
 
 void CPTYMainDlg::OnEnChangeEditVtTimer()
